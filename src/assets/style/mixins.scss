@@ -1,0 +1,93 @@
+@import './config.scss';
+@import './function.scss';
+
+// 系统颜色
+$red: rgba(255, 0, 0, 0.816);
+
+// 垂直和水平居中
+@mixin jcc-aic {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+// 水平居中
+@mixin jcc {
+  display: flex;
+  justify-content: center;
+}
+// 垂直居中
+@mixin aic {
+  display: flex;
+  align-items: center;
+}
+
+// 横向排列，从头开始
+@mixin jcs-row {
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: row;
+}
+// 横向排列，从头开始，垂直居中
+@mixin jcc-aic-row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: row;
+}
+
+// elment-plus的bem合成方法
+// BEM
+@mixin b($block) {
+  $B: $namespace + '-' + $block !global;
+  .#{$B} {
+    @content;
+  }
+}
+
+// $currentSelector 当前的选择器，就是指父级选择器
+@mixin e($element) {
+  $E: $element !global;
+  $selector: &;
+  $currentSelector: '';
+  @each $unit in $element {
+    $currentSelector: #{$currentSelector + '.' + $B + $element-separator + $unit + ','};
+  }
+
+  @if hitAllSpecialNestRule($selector) {
+    @at-root {
+      #{$selector} {
+        #{$currentSelector} {
+          @content;
+        }
+      }
+    }
+  } @else {
+    @at-root {
+      #{$currentSelector} {
+        @content;
+      }
+    }
+  }
+}
+
+@mixin m($modifier) {
+  $selector: &;
+  $currentSelector: '';
+  @each $unit in $modifier {
+    $currentSelector: #{$currentSelector + & + $modifier-separator + $unit + ','};
+  }
+
+  @at-root {
+    #{$currentSelector} {
+      @content;
+    }
+  }
+}
+
+@mixin when($state) {
+  @at-root {
+    &.#{$state-prefix + $state} {
+      @content;
+    }
+  }
+}
