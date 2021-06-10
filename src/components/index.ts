@@ -17,6 +17,7 @@ import Slider from './Swiper/Slider.vue';
 import ZmButton from './button/ZmButton.vue';
 import DrawerTransition from './drawerTransition/index.vue';
 import Drawer from './drawer/index.vue';
+import ZmInput from './input/index.vue';
 
 const ZmSamaUI = {
   install: (Vue: any, options?: any) => {},
@@ -36,6 +37,7 @@ const COMPONENTS = [
   ZmButton,
   DrawerTransition,
   Drawer,
+  ZmInput,
 ];
 
 ZmSamaUI.install = function (Vue, options) {
