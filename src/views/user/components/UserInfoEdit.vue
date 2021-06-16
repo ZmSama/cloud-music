@@ -25,6 +25,15 @@
       </div>
       <div class="row-item">
         <div class="label">生日：</div>
+        <div style="width: 33%">
+          <zm-select />
+        </div>
+        <div style="width: 33%">
+          <zm-select />
+        </div>
+        <div style="width: 33%">
+          <zm-select />
+        </div>
       </div>
       <div class="row-item">
         <div class="label">地区：</div>
