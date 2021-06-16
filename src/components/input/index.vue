@@ -4,7 +4,7 @@
  * @Date: 2021-06-10 11:10:53
 -->
 <template>
-  <div class="zm-input" @mouseenter="enterInput" @mouseleave="leaveInput">
+  <div class="zm-input" @mouseenter="enterInput" @mouseleave="leaveInput" v-if="!isTextArea">
     <div class="zm-input__prefix" v-if="prefixIcon">
       <svg-icon :name="prefixIcon" size="30px"></svg-icon>
     </div>
@@ -12,7 +12,7 @@
       ref="input"
       :disabled="disabled"
       type="text"
-      placeholder="测试数据"
+      :placeholder="placeholder"
       v-bind="$attrs"
       class="zm-input__inner"
       :style="inputSty"
@@ -25,10 +25,22 @@
       <svg-icon :name="suffixIcon" size="30px"></svg-icon>
     </div>
   </div>
+  <div v-else class="zm-textarea">
+    <textarea
+      @input="inputHandler"
+      ref="textarea"
+      draggable="false"
+      :placeholder="placeholder"
+      style="height: 100px"
+      maxlength="300"
+      class="zm-textarea__inner"
+    ></textarea>
+    <span class="word">{{ residue }}</span>
+  </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, ref } from 'vue';
 
 // 导出自定义事件，这是vue规定的
 export const UPDATE_MODEL_EVENT = 'update:modelValue';
@@ -56,29 +68,43 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    type: {
+      type: String,
+      default: '',
+    },
+    placeholder: {
+      type: String,
+      default: '请输入',
+    },
   },
   setup(props, { emit }) {
-    const { prefixIcon, suffixIcon, clean, modelValue } = props;
+    const { prefixIcon, suffixIcon, clean, modelValue, type } = props;
     const input = ref<HTMLInputElement>(null);
+    const textarea = ref<HTMLInputElement>(null);
     const isEnter = ref(false);
     const inputText = ref(null);
-
-    watch(
-      () => modelValue,
-      (pre, next) => {
-        console.log(pre);
-      }
-    );
-
+    const residue = ref(300 - modelValue.toString().length);
     onMounted(() => {
-      if (typeof modelValue == 'string') {
-        input.value.value = modelValue;
-      } else if (typeof modelValue == 'number') {
-        input.value.value = JSON.stringify(modelValue);
-      } else {
-        throw new Error('输入框只能传入字符或者数字类型');
+      switch (type) {
+        case 'text':
+          if (typeof modelValue == 'string') {
+            input.value.value = modelValue;
+          } else if (typeof modelValue == 'number') {
+            input.value.value = JSON.stringify(modelValue);
+          } else {
+            throw new Error('输入框只能传入字符或者数字类型');
+          }
+          break;
+
+        case 'textarea':
+          if (typeof modelValue == 'string') {
+            textarea.value.value = modelValue;
+          } else if (typeof modelValue == 'number') {
+            textarea.value.value = JSON.stringify(modelValue);
+          } else {
+            throw new Error('输入框只能传入字符或者数字类型');
+          }
       }
-      // console.log(modelValue);
     });
 
     // 前后缀样式计算
@@ -105,6 +131,7 @@ export default defineComponent({
         return false;
       }
     });
+    const isTextArea = computed(() => props.type === 'textarea');
 
     // 清空操作
     const cleanHanler = () => {
@@ -129,6 +156,7 @@ export default defineComponent({
       const { value } = e.target;
       inputText.value = value;
       emit(UPDATE_MODEL_EVENT, value);
+      residue.value = 300 - value.length;
     };
 
     return {
@@ -140,6 +168,9 @@ export default defineComponent({
       cleanHanler,
       leaveInput,
       enterInput,
+      isTextArea,
+      textarea,
+      residue,
     };
   },
 });
@@ -196,6 +227,45 @@ export default defineComponent({
     height: 100%;
     @include jcc-aic;
     cursor: pointer;
+  }
+}
+
+@include b(textarea) {
+  width: 100%;
+  font-size: inherit;
+  position: relative;
+  display: inline-block;
+  @include e(inner) {
+    border: 1px solid #ccc;
+    color: rgba(0, 0, 0, 0.6);
+    display: block;
+    resize: none;
+    width: inherit;
+    line-height: 1.5;
+    box-sizing: border-box;
+    transition: 0.3s all;
+    padding: 5px 15px;
+    border-radius: 6px;
+    font-size: 16px;
+    &:focus {
+      outline: none;
+      border-color: rgb(245, 137, 137);
+    }
+    &::placeholder {
+      color: #ccc;
+    }
+    &:disabled {
+      cursor: not-allowed;
+      background-color: #f5f1f1;
+    }
+  }
+
+  .word {
+    position: absolute;
+    bottom: 5px;
+    right: 10px;
+    z-index: 1;
+    color: #ccc;
   }
 }
 </style>

@@ -18,6 +18,8 @@ import ZmButton from './button/ZmButton.vue';
 import DrawerTransition from './drawerTransition/index.vue';
 import Drawer from './drawer/index.vue';
 import ZmInput from './input/index.vue';
+import ZmRadio from './radio/zm-radio.vue';
+import ZmRadioGroup from './radio/zm-radio-group.vue';
 
 const ZmSamaUI = {
   install: (Vue: any, options?: any) => {},
@@ -38,6 +40,8 @@ const COMPONENTS = [
   DrawerTransition,
   Drawer,
   ZmInput,
+  ZmRadio,
+  ZmRadioGroup,
 ];
 
 ZmSamaUI.install = function (Vue, options) {
