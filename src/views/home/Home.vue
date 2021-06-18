@@ -262,17 +262,18 @@ export default defineComponent({
 .Skleft-enter-active,
 .Skleft-leave-active {
   transition: all 600ms;
+  opacity: 0;
 }
 .Skright-enter {
-  transform: translate3d(-100%, 0, 0);
+  transform: translate3d(-10%, 0, 0);
 }
 .Skright-leave-to {
-  transform: translate3d(100%, 0, 0);
+  transform: translate3d(10%, 0, 0);
 }
 .Skleft-enter {
-  transform: translate3d(100%, 0, 0);
+  transform: translate3d(10%, 0, 0);
 }
 .Skleft-leave-to {
-  transform: translate3d(-100%, 0, 0);
+  transform: translate3d(-10%, 0, 0);
 }
 </style>

@@ -26,7 +26,7 @@
       <div class="row-item">
         <div class="label">生日：</div>
         <div style="width: 33%">
-          <zm-select />
+          <zm-select :data="state.y" v-model="selectY" />
         </div>
         <div style="width: 33%">
           <zm-select />
@@ -37,6 +37,18 @@
       </div>
       <div class="row-item">
         <div class="label">地区：</div>
+        <div style="width: 33%">
+          <zm-select />
+        </div>
+        <div style="width: 33%">
+          <zm-select />
+        </div>
+        <div style="width: 33%"></div>
+      </div>
+
+      <div class="bottom">
+        <div class="save-button">保存</div>
+        <div class="cancel-button" @click="cancleHandler">取消</div>
       </div>
     </div>
     <div class="zm-user-info__avater">头像区域</div>
@@ -44,8 +56,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-
+import { defineComponent, onMounted, reactive, ref } from 'vue';
+import useDataYear from '@/components/select/hook/useDataYear';
+import { useRouter } from 'vue-router';
 export default defineComponent({
   name: 'UserInfoEdit',
 
@@ -53,16 +66,28 @@ export default defineComponent({
     const text = ref('廖子默');
     const introduce = ref('缘来缘去终会散，花开花落总归尘');
     const radio = ref('1');
+    const selectY = ref(1996);
+    const router = useRouter();
+
+    const state = reactive({
+      y: useDataYear(),
+    });
 
     const changeHandle = val => {
       console.log(val);
     };
 
+    const cancleHandler = () => {
+      router.back();
+    };
     return {
       text,
       introduce,
       radio,
       changeHandle,
+      state,
+      selectY,
+      cancleHandler,
     };
   },
 });
@@ -95,6 +120,33 @@ export default defineComponent({
       margin-top: 20px;
       .label {
         width: 80px;
+      }
+    }
+    .bottom {
+      position: relative;
+      margin-top: 30px;
+      height: 50px;
+      .save-button {
+        position: absolute;
+        left: 30%;
+        padding: 10px 30px;
+        top: 50%;
+        transform: translate(0, -50%);
+        border: 1px solid #ccc;
+        border-radius: 28px;
+        cursor: pointer;
+        background-color: rgb(255, 47, 47);
+        color: #fff;
+      }
+      .cancel-button {
+        position: absolute;
+        left: 55%;
+        top: 50%;
+        padding: 10px 30px;
+        transform: translate(0, -50%);
+        border: 1px solid #ccc;
+        border-radius: 28px;
+        cursor: pointer;
       }
     }
   }
