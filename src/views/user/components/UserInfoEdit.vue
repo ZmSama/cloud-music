@@ -47,11 +47,14 @@
       </div>
 
       <div class="bottom">
-        <div class="save-button">保存</div>
-        <div class="cancel-button" @click="cancleHandler">取消</div>
+        <zm-popper-button size="mini">保存</zm-popper-button>
+        <zm-popper-button size="mini" color="#000" background="#fff">取消</zm-popper-button>
+        <!-- <div class="cancel-button" @click="cancleHandler">取消</div> -->
       </div>
     </div>
-    <div class="zm-user-info__avater">头像区域</div>
+    <div class="zm-user-info__avater">
+      <zm-upload />
+    </div>
   </div>
 </template>
 

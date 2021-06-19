@@ -103,7 +103,6 @@ export default defineComponent({
     };
     // 点击popper之外
     const handleCloseDrective = () => {
-      console.log('触发这个事件了');
       visible.value = false;
       arrow.value.style.transform = 'rotate(45deg)';
     };

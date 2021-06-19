@@ -198,7 +198,6 @@ export default defineComponent({
           SkipSwitchName.value = 'Skright';
         } else {
           SkipSwitchName.value = 'Skleft';
-          console.log(11);
         }
       }
     );
