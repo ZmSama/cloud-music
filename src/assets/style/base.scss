@@ -297,7 +297,7 @@
   line-height: 60px;
   overflow: hidden;
   background: linear-gradient(135deg, #dd7e66, #ec5091);
-
+  border: 1px solid #ccc;
   @include m(mini) {
     width: 100px;
     height: 40px;

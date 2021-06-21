@@ -13,7 +13,7 @@
       @mouseenter="removeTimer"
       @mouseleave="continueTimer"
     >
-      <svg-icon name="querenzhengque" size="25px"></svg-icon>
+      <svg-icon :name="iconType" size="25px"></svg-icon>
       <span class="zm-message__text">
         {{ message }}
       </span>
@@ -66,6 +66,19 @@ export default defineComponent({
     // 计算类型
     const classType = computed(() => 'zm-message--' + props.type);
 
+    const iconType = computed(() => {
+      switch (props.type) {
+        case 'info':
+          return 'bangzhu';
+        case 'success':
+          return 'querenzhengque';
+        case 'warning':
+          return 'jinggao';
+        case 'error':
+          return 'cuowu';
+      }
+    });
+
     // 计算偏移值
     const offsetSty = computed(() => {
       return {
@@ -101,6 +114,7 @@ export default defineComponent({
       offsetSty,
       removeTimer,
       continueTimer,
+      iconType,
     };
   },
 });
@@ -126,13 +140,13 @@ export default defineComponent({
     background-color: rgb(56, 56, 56);
   }
   @include m(success) {
-    background-color: #e4ffbb;
+    background-color: rgb(56, 56, 56);
   }
   @include m(warning) {
-    background-color: #ffcc00;
+    background-color: rgb(56, 56, 56);
   }
   @include m(error) {
-    background-color: #ff3300;
+    background-color: rgb(56, 56, 56);
   }
 }
 

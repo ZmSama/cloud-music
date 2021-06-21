@@ -48,8 +48,8 @@
 
       <div class="bottom">
         <zm-popper-button size="mini">保存</zm-popper-button>
+
         <zm-popper-button size="mini" color="#000" background="#fff">取消</zm-popper-button>
-        <!-- <div class="cancel-button" @click="cancleHandler">取消</div> -->
       </div>
     </div>
     <div class="zm-user-info__avater">
@@ -129,6 +129,10 @@ export default defineComponent({
       position: relative;
       margin-top: 30px;
       height: 50px;
+      display: flex;
+      justify-content: start;
+      align-items: center;
+      column-gap: 50px;
       .save-button {
         position: absolute;
         left: 30%;
