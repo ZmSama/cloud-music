@@ -16,8 +16,6 @@ export default function throttle(func: Function, wait = 500) {
     let remaining = wait - (now - previous);
     // 间隔时间小于0了那么立即执行函数，第一次必定执行一次
     if (remaining <= 0) {
-      console.log(111);
-
       clearInterval(timer);
       timer = null;
       //  记录能够执行的当前时间
@@ -27,8 +25,6 @@ export default function throttle(func: Function, wait = 500) {
     } else if (!timer) {
       // 剩余间隔时间大于0时，就延迟执行相同间隔时间，并重置上一次时间的时候才能清除当前的定时器，所以下次如果间隔时间没有超过这个间隔的话将会被忽略从而达到了节流的效果
       timer = setTimeout(() => {
-        console.log(222);
-
         clearInterval(timer);
         timer = null;
         previous = new Date().getTime();

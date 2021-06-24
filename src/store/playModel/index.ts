@@ -10,14 +10,11 @@ import { playModelType } from './type';
 const playModel: Module<playModelType, RooteStateType> = {
   namespaced: true,
   state: {
-    count: 1,
-  },
-  getters: {
-    doubleCount: state => state.count * 2,
+    play: false,
   },
   mutations: {
-    ADD_COUNT(state) {
-      state.count += 1;
+    TOOGLE_PLAY_STATU(state) {
+      state.play = !state.play;
     },
   },
 };
