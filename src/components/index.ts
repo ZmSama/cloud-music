@@ -23,6 +23,7 @@ import ZmRadioGroup from './radio/zm-radio-group.vue';
 import ZmSelect from './select/index.vue';
 import ZmUpload from './upload/index.vue';
 import ZmPopperButton from './popper_button/index.vue';
+import ZmPagination from './pagination/index.vue';
 
 const ZmSamaUI = {
   install: (Vue: any, options?: any) => {},
@@ -48,6 +49,7 @@ const COMPONENTS = [
   ZmSelect,
   ZmUpload,
   ZmPopperButton,
+  ZmPagination,
 ];
 
 ZmSamaUI.install = function (Vue, options) {

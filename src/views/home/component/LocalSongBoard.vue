@@ -212,7 +212,12 @@
         </ul>
 
         <div class="load-more">
-          这里使用分页组件
+          <zm-pagination
+            :total="page.total"
+            :pageSize="page.size"
+            :currentPage="page.index"
+            @currentChange="changeHandler"
+          />
           <!-- <zm-popper-button background="linear-gradient(90deg, #e67e22, #e74c3c)" size="mini">
             加载更多评论
           </zm-popper-button> -->
@@ -237,7 +242,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from 'vue';
 import { useStore } from '@/store/index';
 import throttle from '@/utils/throttle';
 
@@ -298,6 +303,11 @@ export default defineComponent({
     const { play } = toRefs(store.state.playModel);
     const isBackTop = ref(false);
     const wrap = ref<HTMLElement>();
+    const page = reactive({
+      index: 1,
+      size: 10,
+      total: 300,
+    });
 
     const clickMe = () => {
       curIndex.value++;
@@ -344,6 +354,12 @@ export default defineComponent({
     const stopPlay = () => {
       clearInterval(timer.value);
     };
+
+    // 分页事件
+    const changeHandler = val => {
+      console.log(val);
+    };
+
     // 页面加载完毕时为当前页面绑定滚动事件完成一些界面的UI交互效果
     onMounted(() => {
       wrap.value.addEventListener(
@@ -382,6 +398,8 @@ export default defineComponent({
       wrap,
       writeSty,
       gotoBackTop,
+      changeHandler,
+      page,
     };
   },
 });
@@ -668,7 +686,6 @@ export default defineComponent({
       text-decoration: none;
       text-align: center;
       padding: 10px 30px;
-      border: 1px solid #ccc;
       border-radius: 26px;
       z-index: 99;
       transition: 1s all;
