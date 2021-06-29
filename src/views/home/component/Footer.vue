@@ -115,7 +115,7 @@ export default defineComponent({
       'http://p4.music.126.net/AB-3WsIeCfDPkRyF_csLVQ==/109951165260265255.jpg?param=200y200'
     );
 
-    const isOpen = ref(true);
+    const isOpen = ref(false);
     const curIcon = ref('bofang2');
     const index = ref(0);
     const timer = ref(null);

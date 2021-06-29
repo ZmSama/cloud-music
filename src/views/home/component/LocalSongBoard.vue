@@ -226,7 +226,7 @@
     </div>
 
     <div class="write-comment" :style="writeSty">
-      <a href="#">写个评论</a>
+      <a href="#" @click="writeContent">写个评论</a>
     </div>
     <div class="backTop" v-show="isBackTop" @click="gotoBackTop">
       <svg-icon name="bofang2" size="25"></svg-icon>
@@ -245,7 +245,7 @@
 import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from 'vue';
 import { useStore } from '@/store/index';
 import throttle from '@/utils/throttle';
-
+import { GET_COUNTIRES_LIST } from '@/api/modules/base';
 export default defineComponent({
   name: 'LocalSongBoard',
   setup() {
@@ -360,6 +360,11 @@ export default defineComponent({
       console.log(val);
     };
 
+    const writeContent = async () => {
+      let res = await GET_COUNTIRES_LIST();
+      console.log(res);
+    };
+
     // 页面加载完毕时为当前页面绑定滚动事件完成一些界面的UI交互效果
     onMounted(() => {
       wrap.value.addEventListener(
@@ -400,6 +405,7 @@ export default defineComponent({
       gotoBackTop,
       changeHandler,
       page,
+      writeContent,
     };
   },
 });

@@ -5,8 +5,8 @@
 -->
 <template>
   <div class="swiper-wrap">
-    <swiper :initial="2" :interval="3000" :auto="true">
-      <slider v-for="item in source" :key="item.id">
+    <swiper :initial="1" :interval="3000" :auto="true" v-if="HOMEPAGE.bannerList.length > 0">
+      <slider v-for="item in HOMEPAGE.bannerList" :key="item.bannerId">
         <img :src="item.pic" alt="" srcset="" />
       </slider>
     </swiper>
@@ -14,9 +14,11 @@
 
   <!-- 推荐歌单 -->
   <div class="zm-recommend">
-    <zm-button @click="clickHandler">推荐歌单</zm-button>
+    <zm-button @click="clickHandler">{{推荐歌单}}</zm-button>
     <div class="recommend-list">
-      <div class="list-item" v-for="item in source" :key="item.id">
+      <div class="list-item" 
+      v-for="item in HOMEPAGE.recomendList" 
+      :key="item.creativeId">
         <div class="cover-img">
           <img :src="item.pic" alt="55555" :title="item.des" />
           <div class="icon">
@@ -101,8 +103,9 @@
 </template>
 
 <script lang="ts">
+import { HOMEPAGE_BLOCK_PAGE } from '@/api/modules/base';
 import ZmButton from '@/components/button/ZmButton.vue';
-import { defineComponent, ref } from 'vue';
+import { defineComponent, onMounted, reactive, ref } from 'vue';
 import RecommendMvItem from './RecommendMvItem.vue';
 export default defineComponent({
   components: { ZmButton, RecommendMvItem },
@@ -166,13 +169,47 @@ export default defineComponent({
         des: '听着听着便走了神，陷入回忆，幸又长了几岁，不然差点落下泪来',
       },
     ]);
+
+    const HOMEPAGE = reactive({
+      bannerList: [],
+      recomendList: {},
+    });
+
     const clickHandler = () => {
       console.log(111);
     };
 
+    const getDataFromApi = async () => {
+      let res = await HOMEPAGE_BLOCK_PAGE();
+      const type: [
+        {
+          code: string;
+          index: number;
+        }
+      ] = res.data.blocks.map((item, index) => {
+        return {
+          code: item.blockCode,
+          index,
+        };
+      });
+      type.forEach(item => {
+        switch (item.code) {
+          case 'HOMEPAGE_BANNER':
+            HOMEPAGE.bannerList = res.data.blocks[item.index].extInfo.banners;
+            break;
+          case 'HOMEPAGE_BLOCK_PLAYLIST_RCMD':
+            HOMEPAGE.recomendList = res.data.blocks[item.index].creatives;
+        }
+      });
+    };
+
+    // onMounted(() => {
+    getDataFromApi();
+    // });
     return {
       clickHandler,
       source,
+      HOMEPAGE,
     };
   },
 });

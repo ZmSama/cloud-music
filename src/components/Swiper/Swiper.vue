@@ -5,7 +5,7 @@
 -->
 
 <script lang="ts">
-import { defineComponent, h, getCurrentInstance, onMounted, ref, VNode } from 'vue';
+import { defineComponent, h, getCurrentInstance, onMounted, ref, VNode, nextTick } from 'vue';
 import Slider from './Slider.vue';
 import throttle from '@/utils/throttle';
 export interface ISlider {
@@ -144,23 +144,28 @@ export default defineComponent({
       // 这里就是要插入外部传入内容的地方，instance.slots.default()返回的是一个数组，
       // 数组内就是所有未定义名字的插槽内容,
       // 如果想在render中获得相同的内容则调用this.$solts. default()
-      const arr = instance.slots.default();
-      // 从上面取出所有的实际子节点,同时处理v-for循环和直接写组件的形式，
-      // 还要防止用户使用非slider组件（使用v-for得到的将是数组、直接写就是对象）
-      const Collection = Array.from(arr).map((item: VNode) => {
-        // 说明是v-for指令的
-        if (typeof item.type == 'symbol') {
-          return item.children;
-        } else if (item.type['name'] == 'Slider') {
-          return item;
-        } else {
-          throw new Error('swiper组件内部只允许使用<slider></slider>组件');
-        }
-      });
-      // 将上面得到的可能是二维数组打散成一维数组既是所有的实际子节点
-      childrenNode.value = Collection.flat().map((item: VNode) => item.children);
 
-      props.auto && autoPlay();
+      const arr = instance.slots.default();
+      if (arr.length > 0) {
+        console.log(arr);
+
+        // 从上面取出所有的实际子节点,同时处理v-for循环和直接写组件的形式，
+        // 还要防止用户使用非slider组件（使用v-for得到的将是数组、直接写就是对象）
+        const Collection = Array.from(arr).map((item: VNode) => {
+          // 说明是v-for指令的
+          if (typeof item.type == 'symbol') {
+            return item.children;
+          } else if (item.type['name'] == 'Slider') {
+            return item;
+          } else {
+            throw new Error('swiper组件内部只允许使用<slider></slider>组件');
+          }
+        });
+        // 将上面得到的可能是二维数组打散成一维数组既是所有的实际子节点
+        childrenNode.value = Collection.flat().map((item: VNode) => item.children);
+
+        props.auto && autoPlay();
+      }
     });
     return {
       initial,
