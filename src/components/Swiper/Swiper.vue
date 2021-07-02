@@ -147,8 +147,6 @@ export default defineComponent({
 
       const arr = instance.slots.default();
       if (arr.length > 0) {
-        console.log(arr);
-
         // 从上面取出所有的实际子节点,同时处理v-for循环和直接写组件的形式，
         // 还要防止用户使用非slider组件（使用v-for得到的将是数组、直接写就是对象）
         const Collection = Array.from(arr).map((item: VNode) => {

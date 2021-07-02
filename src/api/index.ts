@@ -94,7 +94,7 @@ service.interceptors.response.use(
     } else {
       response.data.status = true;
     }
-    return response.data;
+    return response;
   },
   error => {
     if (axios.isCancel(error)) {

@@ -120,6 +120,7 @@ export default defineComponent({
     const index = ref(0);
     const timer = ref(null);
     const store = useStore();
+    const visible = ref(true);
     const { play } = toRefs(store.state.playModel);
     // 打开歌词界面
     const openHandler = () => {

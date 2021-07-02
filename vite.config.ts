@@ -20,6 +20,7 @@ export default defineConfig({
   ],
   server: {
     open: true,
+    port: 8888,
   },
   css: {
     preprocessorOptions: {

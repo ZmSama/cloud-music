@@ -25,13 +25,13 @@ export default function Message(option: IMassgeOptions) {
     offset += vm.el.offsetHeight + 16;
   });
 
-  // 函数劫持，实现关闭后移除dom元素
+  // 函数劫持，实现用户函数回调，能通知用户关闭操作执行了
   let customerClose = option.onClose;
   let opts = {
     ...option,
     offset,
     onClose: () => {
-      console.log('移除dom');
+      // 改变原数组的方法，清空这个消息队列
       MessageQueue.splice(0, MessageQueue.length);
       // 如果外部传入这个关闭方法就调用，否则忽略，es10的链式判断
       customerClose?.();
@@ -43,9 +43,8 @@ export default function Message(option: IMassgeOptions) {
 
   // 把组件变成虚拟节点
   const vm = createVNode(MessageConstructor, opts);
-  console.log(vm.el);
 
-  // 将组件渲染到页面上
+  // 将组件渲染到指定容器上面
   render(vm, container);
   // 把每次弹出的实例收集起来做偏移值计算
   MessageQueue.push(vm);
@@ -55,6 +54,6 @@ export default function Message(option: IMassgeOptions) {
   vm.props.onDestroy = () => {
     render(null, container);
   };
-  // 将这个节点追加到body下
+  // 将这个容器追加到body下
   document.body.appendChild(container.firstElementChild);
 }

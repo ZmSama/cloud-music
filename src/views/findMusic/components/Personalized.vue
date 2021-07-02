@@ -5,8 +5,8 @@
 -->
 <template>
   <div class="swiper-wrap">
-    <swiper :initial="1" :interval="3000" :auto="true" v-if="HOMEPAGE.bannerList.length > 0">
-      <slider v-for="item in HOMEPAGE.bannerList" :key="item.bannerId">
+    <swiper :initial="1" :interval="3000" :auto="true" v-if="bannerList.length > 0">
+      <slider v-for="item in bannerList" :key="item.bannerId">
         <img :src="item.pic" alt="" srcset="" />
       </slider>
     </swiper>
@@ -14,23 +14,38 @@
 
   <!-- 推荐歌单 -->
   <div class="zm-recommend">
-    <zm-button @click="clickHandler">{{推荐歌单}}</zm-button>
-    <div class="recommend-list">
-      <div class="list-item" 
-      v-for="item in HOMEPAGE.recomendList" 
-      :key="item.creativeId">
+    <zm-button @click="clickHandler">推荐歌单</zm-button>
+    <div class="recommend-list" v-loading="loading" zm-loading-text="正在加载...">
+      <div class="list-item">
         <div class="cover-img">
-          <img :src="item.pic" alt="55555" :title="item.des" />
+          <span class="today-rec__text">根据您的音乐口味生成每日更新</span>
+          <span class="today-rec">{{ judgeTodayNum() }}</span>
+          <svg-icon name="rili2" size="170px"></svg-icon>
+          <div class="icon">
+            <svg-icon name="bofang" size="30" color="red"></svg-icon>
+          </div>
+          <div class="play-num">
+            <!-- <svg-icon name="bofang"></svg-icon> -->
+            <!-- <span>11万</span> -->
+          </div>
+        </div>
+        <div class="description">
+          <span>每日歌曲推荐</span>
+        </div>
+      </div>
+      <div class="list-item" v-for="item in recomendList" :key="item.id">
+        <div class="cover-img">
+          <img :src="item.picUrl" alt="55555" :title="item.des" />
           <div class="icon">
             <svg-icon name="bofang" size="30" color="red"></svg-icon>
           </div>
           <div class="play-num">
             <svg-icon name="bofang"></svg-icon>
-            <span>11万</span>
+            <span>{{ judgePayCount(item.playCount) }}</span>
           </div>
         </div>
         <div class="description">
-          <span>{{ item.des }}</span>
+          <span>{{ item.name }}</span>
         </div>
       </div>
     </div>
@@ -40,34 +55,12 @@
   <div class="zm-exclusive">
     <zm-button>独家放送</zm-button>
     <div class="zm-exclusive-list">
-      <div class="zm-exclusive-list__item">
+      <div class="zm-exclusive-list__item" v-for="item in personalied" :key="item.id">
         <div class="cover-img">
-          <img
-            src="http://p4.music.126.net/nqEkothDhOrKfupxYOzmpA==/109951165611132172.jpg?param=200y200"
-          />
+          <img :src="item.sPicUrl" />
         </div>
         <div class="description">
-          <span>超级面对面</span>
-        </div>
-      </div>
-      <div class="zm-exclusive-list__item">
-        <div class="cover-img">
-          <img
-            src="http://p4.music.126.net/nqEkothDhOrKfupxYOzmpA==/109951165611132172.jpg?param=200y200"
-          />
-        </div>
-        <div class="description">
-          <span>超级面对面</span>
-        </div>
-      </div>
-      <div class="zm-exclusive-list__item">
-        <div class="cover-img">
-          <img
-            src="http://p4.music.126.net/nqEkothDhOrKfupxYOzmpA==/109951165611132172.jpg?param=200y200"
-          />
-        </div>
-        <div class="description">
-          <span>超级面对面</span>
+          <span>{{ item.name }}</span>
         </div>
       </div>
     </div>
@@ -77,16 +70,12 @@
   <div class="zm-new-song">
     <zm-button>最新音乐</zm-button>
     <div class="zm-new-song-list">
-      <div class="zm-new-song-list__item" v-for="i in 12" :key="i">
+      <div class="zm-new-song-list__item" v-for="item in newRecommandSong" :key="item.id">
         <div class="cover">
-          <img
-            src="http://p4.music.126.net/nqEkothDhOrKfupxYOzmpA==/109951165611132172.jpg?param=200y200"
-            alt=""
-            srcset=""
-          />
+          <img :src="item.picUrl" alt="" srcset="" />
         </div>
-        <div class="song-name">初恋</div>
-        <div class="singer">莫文蔚</div>
+        <div class="song-name">{{ item.name }}</div>
+        <div class="singer">{{ judgeArist(item.song.artists) }}</div>
       </div>
     </div>
   </div>
@@ -95,18 +84,19 @@
   <div class="zm-recommend-mv">
     <zm-button>推荐MV</zm-button>
     <div class="zm-recommend-mv-list">
-      <recommend-mv-item />
-      <recommend-mv-item />
-      <recommend-mv-item />
+      <recommend-mv-item v-for="item in recommandMV" :key="item.id" :data="item" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { HOMEPAGE_BLOCK_PAGE } from '@/api/modules/base';
 import ZmButton from '@/components/button/ZmButton.vue';
-import { defineComponent, onMounted, reactive, ref } from 'vue';
+import { defineComponent, ref } from 'vue';
 import RecommendMvItem from './RecommendMvItem.vue';
+import Tools from '../utils/index';
+import GloabTools from '@/utils/tools';
+import useApiData from '../hooks/useApiData';
+import { ZmLoading } from '@/components';
 export default defineComponent({
   components: { ZmButton, RecommendMvItem },
   name: 'Personalized',
@@ -117,99 +107,47 @@ export default defineComponent({
     },
   },
   setup() {
-    const source = ref([
-      {
-        id: 1,
-        pic: 'http://p3.music.126.net/GgAZIFuvNmTQNqelaVEoew==/109951166040896117.jpg?param=200y200',
-        des: '让这甜甜的歌单来缓解你一天的疲惫让我们一起陪伴你，在你一个人的时候',
-      },
-      {
-        id: 2,
-        pic: 'http://p4.music.126.net/YCy9Pw8-sgzr895nzeVLkQ==/109951166029803859.jpg?param=200y200',
-        des: '温柔的暖风一定能吹散很多的不愉快',
-      },
-      {
-        id: 3,
-        pic: 'http://p3.music.126.net/o2o8w3fNGLyLXghtpq2nCA==/109951165926666028.jpg?param=200y200',
-        des: '海上月是天上月，眼前人是心上人，',
-      },
-      {
-        id: 4,
-        pic: 'http://p4.music.126.net/XQlI-cyn4ip07RGt1Fqqcw==/109951162837149540.jpg?param=200y200',
-        des: '无非在做两件事情：谋生，谋爱！',
-      },
-      {
-        id: 5,
-        pic: 'http://p4.music.126.net/QOWiQGhR6Tg0pOry_M0WIA==/109951165620939851.jpg?param=200y200',
-        des: '没有钱委屈肉身，没有爱折磨灵魂。',
-      },
-      {
-        id: 6,
-        pic: 'http://p4.music.126.net/nqEkothDhOrKfupxYOzmpA==/109951165611132172.jpg?param=200y200',
-        des: '听着听着便走了神，陷入回忆，幸又长了几岁，不然差点落下泪来',
-      },
-      {
-        id: 7,
-        pic: 'http://p4.music.126.net/nqEkothDhOrKfupxYOzmpA==/109951165611132172.jpg?param=200y200',
-        des: '听着听着便走了神，陷入回忆，幸又长了几岁，不然差点落下泪来',
-      },
-      {
-        id: 8,
-        pic: 'http://p4.music.126.net/nqEkothDhOrKfupxYOzmpA==/109951165611132172.jpg?param=200y200',
-        des: '听着听着便走了神，陷入回忆，幸又长了几岁，不然差点落下泪来',
-      },
-      {
-        id: 9,
-        pic: 'http://p4.music.126.net/nqEkothDhOrKfupxYOzmpA==/109951165611132172.jpg?param=200y200',
-        des: '听着听着便走了神，陷入回忆，幸又长了几岁，不然差点落下泪来',
-      },
-      {
-        id: 10,
-        pic: 'http://p4.music.126.net/nqEkothDhOrKfupxYOzmpA==/109951165611132172.jpg?param=200y200',
-        des: '听着听着便走了神，陷入回忆，幸又长了几岁，不然差点落下泪来',
-      },
-    ]);
-
-    const HOMEPAGE = reactive({
-      bannerList: [],
-      recomendList: {},
-    });
+    const loading = ref(false);
+    const { judgeArist, judgeTodayNum } = Tools();
+    const { judgePayCount } = GloabTools();
+    const {
+      getBannerData,
+      getPersonalizedData,
+      getRecommandData,
+      getNewRecommandSongData,
+      getRecommandMV,
+      bannerList,
+      recomendList,
+      recommandMV,
+      newRecommandSong,
+      personalied,
+    } = useApiData();
 
     const clickHandler = () => {
       console.log(111);
+      loading.value = !loading.value;
+
+      // ZmLoading.service({
+      //   background: 'rgba(0,0,0,0.5)',
+      // });
     };
 
-    const getDataFromApi = async () => {
-      let res = await HOMEPAGE_BLOCK_PAGE();
-      const type: [
-        {
-          code: string;
-          index: number;
-        }
-      ] = res.data.blocks.map((item, index) => {
-        return {
-          code: item.blockCode,
-          index,
-        };
-      });
-      type.forEach(item => {
-        switch (item.code) {
-          case 'HOMEPAGE_BANNER':
-            HOMEPAGE.bannerList = res.data.blocks[item.index].extInfo.banners;
-            break;
-          case 'HOMEPAGE_BLOCK_PLAYLIST_RCMD':
-            HOMEPAGE.recomendList = res.data.blocks[item.index].creatives;
-        }
-      });
-    };
-
-    // onMounted(() => {
-    getDataFromApi();
-    // });
+    getBannerData();
+    getPersonalizedData();
+    getRecommandData();
+    getNewRecommandSongData();
+    getRecommandMV();
     return {
+      bannerList,
+      recomendList,
+      recommandMV,
+      newRecommandSong,
+      personalied,
+      judgeArist,
+      judgePayCount,
+      judgeTodayNum,
       clickHandler,
-      source,
-      HOMEPAGE,
+      loading,
     };
   },
 });
@@ -236,10 +174,51 @@ export default defineComponent({
       border-radius: 5px;
       overflow: hidden;
       cursor: pointer;
+      &:first-child .cover-img {
+        @include jcc-aic;
+        z-index: 1;
+        &::after {
+          content: '';
+          width: 100%;
+          height: 100%;
+          position: absolute;
+          left: 0;
+          top: 0;
+          /* 从父元素继承 background 属性的设置 */
+          background: linear-gradient(360deg, rgb(48, 98, 120), rgb(100, 86, 84));
+          filter: blur(2px);
+          z-index: -1;
+        }
+        &:hover .today-rec__text {
+          top: 0;
+        }
+        .today-rec {
+          position: absolute;
+          color: #fff;
+          font-weight: 600;
+          font-size: 80px;
+          top: 60%;
+          transform: translateY(-50%);
+          z-index: 1;
+        }
+        .today-rec__text {
+          width: 100%;
+          position: absolute;
+          top: -40px;
+          left: 0;
+          display: inline-block;
+          height: 40px;
+          background: rgba(0, 0, 0, 0.3);
+          font-size: 14px;
+          color: #fff;
+          @include jcc-aic;
+          z-index: 3;
+          transition: 0.4s all;
+        }
+      }
       .cover-img {
         height: 85%;
         width: 100%;
-        background-color: aqua;
         border-radius: 5px;
         overflow: hidden;
         position: relative;

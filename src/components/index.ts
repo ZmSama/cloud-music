@@ -3,7 +3,7 @@
  * @Autor: ZmSama
  * @Date: 2021-05-17 14:32:13
  */
-
+import type { App } from 'vue';
 import SvgIcon from './SvgIcon/index.vue';
 import InputSelect from './InputSelect/index.vue';
 import CollapseTransition from './collapseTransition/index.vue';
@@ -24,9 +24,9 @@ import ZmSelect from './select/index.vue';
 import ZmUpload from './upload/index.vue';
 import ZmPopperButton from './popper_button/index.vue';
 import ZmPagination from './pagination/index.vue';
-
+import ZmLoading from './loading/index';
 const ZmSamaUI = {
-  install: (Vue: any, options?: any) => {},
+  install: (app: App, options?: any) => {},
 };
 
 const COMPONENTS = [
@@ -52,23 +52,29 @@ const COMPONENTS = [
   ZmPagination,
 ];
 
-ZmSamaUI.install = function (Vue, options) {
+const plugins = [ZmLoading];
+ZmSamaUI.install = function (app: App, options) {
   // 如果传入配置就使用配置
   if (options && options.components) {
     const components = options.components;
     components.forEach((item: any) => {
       COMPONENTS.forEach(component => {
         if (component.name == item) {
-          Vue.component(component.name, component);
+          app.component(component.name, component);
         }
       });
     });
     // 否则全局注册
   } else {
     COMPONENTS.forEach(component => {
-      Vue.component(component.name, component);
+      app.component(component.name, component);
+    });
+
+    plugins.forEach(plugin => {
+      app.use(plugin);
     });
   }
 };
 
+export { ZmLoading };
 export default ZmSamaUI;

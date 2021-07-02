@@ -6,33 +6,40 @@
 <template>
   <div class="zm-recommend-mv-item" @mouseenter="enterHandler" @mouseleave="leaveHandler">
     <div class="zm-recommend-mv-item__cover">
-      <img
-        src="http://p4.music.126.net/nqEkothDhOrKfupxYOzmpA==/109951165611132172.jpg?param=200y200"
-        alt=""
-      />
+      <img :src="data.picUrl" alt="" />
     </div>
     <div class="zm-recommend-mv-item__name">
-      因为有你接送地方窘事递归阿济格老公就是几个哦根本giigngi
+      {{ data.name }}
     </div>
-    <div class="zm-recommend-mv-item__singer">李吴</div>
+    <div class="zm-recommend-mv-item__singer">{{ judgeArist(data.artists) }}</div>
 
     <div class="zm-recommend-mv-item__playnum" v-show="!isTips">
       <svg-icon name="bofang" size="20px" color="#fff"></svg-icon>
-      44万
+      {{ judgePayCount(data.playCount) }}
     </div>
     <transition name="zm-recommend-mv-item-tips">
-      <div class="zm-recommend-mv-item__tips" v-show="isTips">最新热门mv推荐</div>
+      <div class="zm-recommend-mv-item__tips" v-show="isTips">{{ data.copywriter }}</div>
     </transition>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-
+import Tools from '../utils/index';
+import GloabTools from '@/utils/tools';
 export default defineComponent({
   name: 'RecommendMvItem',
+  props: {
+    data: {
+      type: Object,
+      default: () => {},
+    },
+  },
   setup() {
     const isTips = ref(false);
+
+    const { judgeArist } = Tools();
+    const { judgePayCount } = GloabTools();
 
     const enterHandler = () => {
       isTips.value = true;
@@ -46,6 +53,8 @@ export default defineComponent({
       isTips,
       enterHandler,
       leaveHandler,
+      judgeArist,
+      judgePayCount,
     };
   },
 });
