@@ -18,6 +18,7 @@ import {
 } from 'vue';
 import { ILoadingCreateComponentParams, ILoadingInstance } from './types';
 import SvgIcon from '@/components/SvgIcon/index.vue';
+import { removeClass } from '@/utils/dom';
 export function createLoadingComponent({
   options,
   globalLoadingOption,
@@ -40,6 +41,10 @@ export function createLoadingComponent({
   function destroySelf() {
     // 如果这个loading存在，并且它的父级节点也在，就移除loading
     if (vm.el && vm.el.parentNode) {
+      // 移除添加的position样式
+      removeClass(vm.el.parentNode, 'zm-loading-parent--relative');
+      // 移除提示信息
+      // vm.el.parentNode.removeAttribute('zm-loading-text');
       vm.el.parentNode.removeChild(vm.el);
     }
   }

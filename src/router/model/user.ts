@@ -1,5 +1,5 @@
 /*
- * @Description:
+ * @Description:用户相关路由
  * @Autor: ZmSama
  * @Date: 2021-06-09 15:56:12
  */
@@ -10,7 +10,7 @@ const userRoterList: RouteRecordRaw[] = [
     name: 'UsreInfoEdit',
     component: () => import('@/views/user/components/UserInfoEdit.vue'),
     meta: {
-      index: 3,
+      index: 4,
     },
   },
 ];

@@ -173,6 +173,9 @@ export default defineComponent({
     const router = useRouter();
 
     const selectHistoryItem = (item: any) => {
+      router.push({
+        name: 'MusicSearchDetails',
+      });
       console.log('当前选择的历史记录是', toRaw(item.value));
     };
     const toUserInfo = () => {

@@ -92,7 +92,7 @@ export default defineComponent({
   directives: {
     clickoutside,
   },
-  setup(props) {
+  setup(props, { emit }) {
     const { hotdata } = props;
     const listData = ref([]);
     listData.value = hotdata;
@@ -112,9 +112,7 @@ export default defineComponent({
     } = useInput(props.historydata);
 
     const selectHistoryHandler = (item: any) => {
-      console.log(item);
-
-      // ctx.emit("selectHistoryItem", item)
+      emit('selectHistoryItem', item);
     };
 
     const iconColor = (type: string) => {

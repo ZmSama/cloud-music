@@ -9,6 +9,7 @@
   "dependencies": {
     "@popperjs/core": "^2.9.2",
     "axios": "^0.21.1",
+    "element-plus": "^1.0.2-beta.54",
     "mitt": "^2.1.0",
     "postcss": "^8.2.14",
     "vue": "^3.0.5",

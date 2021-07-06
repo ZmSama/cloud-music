@@ -25,6 +25,8 @@ import ZmUpload from './upload/index.vue';
 import ZmPopperButton from './popper_button/index.vue';
 import ZmPagination from './pagination/index.vue';
 import ZmLoading from './loading/index';
+import ZmTable from './table/index.vue';
+import ZmTableColumn from './table/table-column/index';
 const ZmSamaUI = {
   install: (app: App, options?: any) => {},
 };
@@ -50,6 +52,8 @@ const COMPONENTS = [
   ZmUpload,
   ZmPopperButton,
   ZmPagination,
+  ZmTable,
+  ZmTableColumn,
 ];
 
 const plugins = [ZmLoading];

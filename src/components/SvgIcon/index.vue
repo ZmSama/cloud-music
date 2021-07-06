@@ -60,6 +60,7 @@ export default defineComponent({
   // &:hover {
   //   opacity: 1;
   // }
-  // cursor: pointer;
+  cursor: pointer;
+  z-index: 0;
 }
 </style>

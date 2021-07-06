@@ -8,6 +8,8 @@ import App from './App.vue';
 import router from './router/index';
 import { store, key } from './store/index';
 import ZmSamaUI from './components/index';
+import ElementPlus from 'element-plus';
+import 'element-plus/lib/theme-chalk/index.css';
 import './assets/icons/iconfont';
 // import "vite-plugin-svg-icons/register"
 import './assets/style/reset.css';
@@ -16,4 +18,5 @@ const app = createApp(App);
 app.use(store, key);
 app.use(router);
 app.use(ZmSamaUI);
+app.use(ElementPlus);
 app.mount('#app');

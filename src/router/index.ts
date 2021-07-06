@@ -5,6 +5,7 @@
  */
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router';
 import userRoterList from './model/user';
+import musicRoterList from './model/music';
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
@@ -23,6 +24,7 @@ const routes: RouteRecordRaw[] = [
     },
   },
   ...userRoterList,
+  ...musicRoterList,
 ];
 
 const router = createRouter({
