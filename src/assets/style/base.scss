@@ -1,4 +1,5 @@
 @import './mixins';
+@import './element-plus-fix.scss';
 // 手风琴过渡样式
 .collapse-transition {
   transition: 0.5s height ease-in-out, 0.3s padding-top ease-in-out, 0.3s padding-bottom ease-in-out;

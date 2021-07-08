@@ -6,10 +6,10 @@
 <template>
   <div class="zm-footer">
     <!-- 歌词面板未展开状态 -->
-    <div class="close-status" :class="{ 'close-up': isOpen }">
+    <div class="close-status" :class="{ 'close-up': isOpen }" v-show="curMusic">
       <div
         class="cover"
-        :style="{ 'background-image': 'url(' + curPlayPic + ')' }"
+        :style="{ 'background-image': 'url(' + curMusic?.pic + ')' }"
         @click="openHandler"
       >
         <!-- <img
@@ -22,11 +22,11 @@
       </div>
       <div class="song-info">
         <div class="song-name" @click="likerClick">
-          <span>问剑江湖</span>
+          <span>{{ curMusic?.songName }}</span>
           <svg-icon name="heart" size="20"></svg-icon>
         </div>
         <div class="songer">
-          <span>双笙</span>
+          <span>{{ curMusic?.art }}</span>
         </div>
       </div>
     </div>
@@ -59,9 +59,9 @@
         <div class="pre-song">
           <svg-icon name="prev" size="25px"></svg-icon>
         </div>
-        <div class="pause-play" @click="playHandler">
-          <svg-icon name="bofang2" size="25px" v-if="play"></svg-icon>
-          <svg-icon name="bofang1" size="25px" v-else></svg-icon>
+        <div class="pause-play">
+          <svg-icon name="bofang1" size="25px" v-if="play" @click="playHandler"></svg-icon>
+          <svg-icon name="bofang2" size="25px" v-else @click="playHandler"></svg-icon>
         </div>
         <div class="next-song">
           <svg-icon name="next" size="25px"></svg-icon>
@@ -69,13 +69,16 @@
         <div class="song-word">词</div>
       </div>
       <div class="bottom">
-        <div class="progress-area">
-          <div class="progress-bar"></div>
-          <div class="progress-buff"></div>
-          <div class="timer">
-            <span class="current">0:20</span>
-            <span class="duration">3:40</span>
+        <div class="progress-area" @click.stop="clickProgressArea">
+          <div class="progress-bar" ref="progressBar">
+            <div class="dot" @mousedown.stop="draggerDot"></div>
           </div>
+          <div class="progress-buff" ref="progressBuffBar"></div>
+          <div class="timer">
+            <span class="current">{{ current }}</span>
+            <span class="duration">{{ duration }}</span>
+          </div>
+          <audio :src="curMusic?.url" ref="audioRef"></audio>
         </div>
       </div>
     </div>
@@ -91,19 +94,21 @@
     </div>
 
     <!-- 单独的歌词面板 -->
-    <drawer :visible="isOpen">
+
+    <el-drawer v-model="isOpen" :withHeader="false" :show-close="false" direction="btt" size="100%">
       <div class="zm-hidden-board">
-        <local-song-board />
+        <local-song-board :isOpen="isOpen" />
       </div>
-    </drawer>
+    </el-drawer>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, toRefs, watch } from 'vue';
+import { defineComponent, onMounted, ref, toRefs } from 'vue';
 import Message from '@/components/message/src/message';
 import LocalSongBoard from './LocalSongBoard.vue';
 import { useStore } from '@/store/index';
+import { useMusic } from '../hooks/useMusic';
 
 export default defineComponent({
   name: 'Footer',
@@ -111,17 +116,28 @@ export default defineComponent({
     LocalSongBoard,
   },
   setup() {
-    const curPlayPic = ref(
-      'http://p4.music.126.net/AB-3WsIeCfDPkRyF_csLVQ==/109951165260265255.jpg?param=200y200'
-    );
+    const {
+      playMusic,
+      pauseMusic,
+      isOpen,
+      curIcon,
+      index,
+      timer,
+      music,
+      curMusic,
+      duration,
+      current,
+      progressBar,
+      progressBuffBar,
+      clickProgressArea,
+      draggerDot,
+    } = useMusic();
 
-    const isOpen = ref(false);
-    const curIcon = ref('bofang2');
-    const index = ref(0);
-    const timer = ref(null);
     const store = useStore();
-    const visible = ref(true);
-    const { play } = toRefs(store.state.playModel);
+    const audioRef = ref<HTMLAudioElement>();
+    const isRender = ref(false);
+    const { play, musicSource } = toRefs(store.state.playModel);
+    curMusic.value = musicSource;
     // 打开歌词界面
     const openHandler = () => {
       isOpen.value = true;
@@ -130,7 +146,6 @@ export default defineComponent({
     const closeHandler = () => {
       isOpen.value = false;
     };
-
     const likerClick = () => {
       Message({
         type: 'info',
@@ -140,50 +155,41 @@ export default defineComponent({
     };
 
     const playHandler = () => {
-      store.commit('playModel/TOOGLE_PLAY_STATU');
+      store.commit('playModel/TOGGLE_PLAY_PAUSE');
+      if (play.value) {
+        playMusic();
+      } else {
+        pauseMusic();
+      }
     };
 
-    const dotStyle = computed(() => {
-      return {
-        transform: `translate(${index.value}%,-50%)`,
-      };
+    onMounted(() => {
+      isRender.value = true;
+      if (isRender.value) {
+        store.commit('playModel/SET_AUDIO_INSTANCE', audioRef.value);
+      }
     });
 
-    const barPlay = () => {
-      timer.value = setInterval(() => {
-        index.value++;
-      }, 1000);
-    };
-
-    const barStop = () => {
-      clearInterval(timer.value);
-    };
-
-    watch(
-      () => play,
-      val => {
-        if (val.value) {
-          barPlay();
-          // console.log(111);
-        } else {
-          barStop();
-        }
-      },
-      {
-        deep: true,
-      }
-    );
     return {
-      curPlayPic,
       isOpen,
+      curIcon,
+      index,
+      timer,
+      music,
+      curMusic,
+      duration,
+      current,
+      audioRef,
+      progressBar,
+      progressBuffBar,
       openHandler,
       closeHandler,
       likerClick,
       playHandler,
-      curIcon,
-      store,
       play,
-      dotStyle,
+      isRender,
+      clickProgressArea,
+      draggerDot,
     };
   },
 });
@@ -212,6 +218,8 @@ export default defineComponent({
       cursor: pointer;
       overflow: hidden;
       position: relative;
+      object-fit: cover;
+      background-size: contain;
       img {
         width: 100%;
         height: 100%;
@@ -360,9 +368,8 @@ export default defineComponent({
         background-color: aliceblue;
         border-radius: 4px;
         position: relative;
-        cursor: pointer;
         .progress-bar {
-          width: 60%;
+          width: 0;
           height: inherit;
           background: linear-gradient(90deg, #f6e58d 0%, #eb4d4b 100%);
           border-radius: inherit;
@@ -370,31 +377,29 @@ export default defineComponent({
           position: absolute;
           left: 0;
           top: 50%;
+          pointer-events: none;
           transform: translateY(-50%);
-          &::after {
-            content: '';
+          .dot {
             width: 10px;
             height: 10px;
+            background: #e9dddd;
+            border-radius: 50%;
             position: absolute;
-            right: 0;
+            cursor: pointer;
+            right: -5px;
             top: 50%;
             transform: translateY(-50%);
-            border-radius: 50%;
-            background: rgb(14, 50, 233);
-            opacity: 0;
-            transition: 0.2s opacity;
+            z-index: 9;
           }
-        }
-        &:hover .progress-bar::after {
-          opacity: 1;
         }
         .progress-buff {
           height: inherit;
           background-color: rgba(0, 0, 0, 0.1);
-          width: 40%;
+          width: 0;
           position: absolute;
           left: 0;
           top: 50%;
+          pointer-events: none;
           transform: translateY(-50%);
           border-radius: inherit;
           z-index: 0;

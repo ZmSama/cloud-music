@@ -56,7 +56,6 @@ const COMPONENTS = [
   ZmTableColumn,
 ];
 
-const plugins = [ZmLoading];
 ZmSamaUI.install = function (app: App, options) {
   // 如果传入配置就使用配置
   if (options && options.components) {
@@ -74,11 +73,10 @@ ZmSamaUI.install = function (app: App, options) {
       app.component(component.name, component);
     });
 
-    plugins.forEach(plugin => {
-      app.use(plugin);
-    });
+    // plugins.forEach(plugin => {
+    //   app.use(plugin);
+    // });
   }
 };
 
-export { ZmLoading };
 export default ZmSamaUI;

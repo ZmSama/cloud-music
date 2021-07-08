@@ -16,13 +16,13 @@
         <div class="disc">
           <img src="@/assets/img/disc.png" alt="" srcset="" />
           <div class="cover">
-            <img src="@/assets/img/avater.jpg" alt="" srcset="" />
+            <img :src="musicSource?.pic" alt="" srcset="" />
           </div>
         </div>
       </div>
       <div class="zm-song-board__song">
-        <div class="name">寒衫浮梦</div>
-        <div class="auth">双笙-寒衫浮梦</div>
+        <div class="name">{{ musicSource?.songName }}</div>
+        <div class="auth">{{ musicSource?.art }}</div>
       </div>
       <!-- 可视区域 -->
       <div class="zm-song-board__visibleView">
@@ -246,9 +246,21 @@ import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } fr
 import { useStore } from '@/store/index';
 import throttle from '@/utils/throttle';
 import { GET_COUNTIRES_LIST } from '@/api/modules/base';
+import { GET_SONG_WORD } from '@/api/modules/searchSong';
+import { log } from 'util';
 export default defineComponent({
   name: 'LocalSongBoard',
-  setup() {
+  props: {
+    isOpen: {
+      type: Boolean,
+      default: false,
+    },
+    id: {
+      type: Number,
+    },
+  },
+  setup(props) {
+    const { isOpen, id } = props;
     const wordArr = ref([
       '作词 : 菌上蚁',
       '作曲 : 阿坤',
@@ -300,7 +312,7 @@ export default defineComponent({
     const curIndex = ref(0);
     const timer = ref(null);
     const store = useStore();
-    const { play } = toRefs(store.state.playModel);
+    const { play, musicSource } = toRefs(store.state.playModel);
     const isBackTop = ref(false);
     const wrap = ref<HTMLElement>();
     const page = reactive({
@@ -324,6 +336,12 @@ export default defineComponent({
         }
       }, 16.7);
       isBackTop.value = false;
+    };
+
+    // 得到歌词
+    const getSongWrod = async id => {
+      let res = await GET_SONG_WORD(id);
+      console.log(res);
     };
 
     // 歌词滚动样式
@@ -378,12 +396,14 @@ export default defineComponent({
           }
         })
       );
+      startPlay();
     });
     watch(
       () => play,
       val => {
         if (val.value) {
           startPlay();
+          // getSongWrod(musicSource.value?.id);
         } else {
           stopPlay();
         }
@@ -391,6 +411,11 @@ export default defineComponent({
       {
         deep: true,
       }
+    );
+
+    watch(
+      () => isOpen,
+      val => {}
     );
 
     return {
@@ -406,6 +431,7 @@ export default defineComponent({
       changeHandler,
       page,
       writeContent,
+      musicSource,
     };
   },
 });
@@ -472,8 +498,10 @@ export default defineComponent({
         transition: 0.4s all;
       }
       .disc {
-        width: 480px;
-        height: 480px;
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        position: absolute;
         @include jcc-aic;
         .cover {
           position: absolute;
@@ -488,6 +516,7 @@ export default defineComponent({
       @include when(active) {
         .disc {
           animation: rotate 10s infinite linear;
+          transform-origin: center;
         }
         .needle {
           transform: rotate(20deg);

@@ -1,0 +1,22 @@
+// 表格滚动条重置
+.el-table__body-wrapper {
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0);
+    border-radius: 3px;
+    padding: 3px 0;
+  }
+  &:hover {
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+// 分页背景色
+.el-pagination.is-background .el-pager li:not(.disabled).active {
+  background-color: red !important;
+  color: #fff;
+}

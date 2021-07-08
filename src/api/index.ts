@@ -6,6 +6,7 @@
 
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import Message from '@/components/message/src/message';
+
 // 定义一些状态
 const MsgStatus = (status: number) => {
   let message = '';
@@ -68,6 +69,17 @@ const service = axios.create({
 // 请求拦截
 service.interceptors.request.use(
   (config: AxiosRequestConfig) => {
+    if (config.method === 'post') {
+      config.data = {
+        ...config.data,
+        timestamp: new Date().getTime(),
+      };
+    } else if (config.method === 'get') {
+      config.params = {
+        timestamp: new Date().getTime(),
+        ...config.params,
+      };
+    }
     // 追加token之类的操作
     return config;
   },

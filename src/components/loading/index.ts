@@ -12,6 +12,5 @@ export default {
     app.directive('loading', vLoading);
     app.config.globalProperties.$loading = Loading;
   },
-  directive: vLoading,
   service: Loading,
 };

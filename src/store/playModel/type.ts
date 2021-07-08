@@ -1,3 +1,5 @@
+import { IMusicParams } from '@/typs/models/music';
+
 /*
  * @Description:
  * @Autor: ZmSama
@@ -5,4 +7,6 @@
  */
 export interface playModelType {
   play: boolean;
+  musicSource: IMusicParams;
+  audioRef: HTMLAudioElement;
 }
