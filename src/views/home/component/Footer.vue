@@ -6,7 +6,7 @@
 <template>
   <div class="zm-footer">
     <!-- 歌词面板未展开状态 -->
-    <div class="close-status" :class="{ 'close-up': isOpen }" v-show="curMusic">
+    <div class="close-status" :class="{ 'close-up': isOpen }">
       <div
         class="cover"
         :style="{ 'background-image': 'url(' + curMusic?.pic + ')' }"
@@ -20,7 +20,7 @@
           <svg-icon name="left_back" color="black" size="20px"></svg-icon>
         </div>
       </div>
-      <div class="song-info">
+      <div class="song-info" v-show="curMusic">
         <div class="song-name" @click="likerClick">
           <span>{{ curMusic?.songName }}</span>
           <svg-icon name="heart" size="20"></svg-icon>
@@ -95,7 +95,15 @@
 
     <!-- 单独的歌词面板 -->
 
-    <el-drawer v-model="isOpen" :withHeader="false" :show-close="false" direction="btt" size="100%">
+    <el-drawer
+      v-model="isOpen"
+      :withHeader="false"
+      :show-close="false"
+      direction="btt"
+      size="100%"
+      append-to-body
+      @open="drawerOpen"
+    >
       <div class="zm-hidden-board">
         <local-song-board :isOpen="isOpen" />
       </div>
@@ -109,7 +117,9 @@ import Message from '@/components/message/src/message';
 import LocalSongBoard from './LocalSongBoard.vue';
 import { useStore } from '@/store/index';
 import { useMusic } from '../hooks/useMusic';
-
+import { ElMessage } from 'element-plus';
+import { GET_SONG_WORD } from '@/api/modules/music';
+import GloabTools from '@/utils/tools';
 export default defineComponent({
   name: 'Footer',
   components: {
@@ -134,18 +144,36 @@ export default defineComponent({
     } = useMusic();
 
     const store = useStore();
+    const { formatLyric } = GloabTools();
     const audioRef = ref<HTMLAudioElement>();
     const isRender = ref(false);
     const { play, musicSource } = toRefs(store.state.playModel);
     curMusic.value = musicSource;
     // 打开歌词界面
-    const openHandler = () => {
-      isOpen.value = true;
+    const openHandler = async () => {
+      if (musicSource.value) {
+        let res = await GET_SONG_WORD({ id: musicSource.value.id });
+        if (res.data) {
+          let lyric = formatLyric(res.data.lrc.lyric);
+          // 将歌词设置到vuex
+          store.commit('playModel/SET_SONG_LYRIC', lyric);
+          setTimeout(() => {
+            isOpen.value = true;
+          }, 200);
+        }
+      } else {
+        ElMessage({
+          type: 'warning',
+          message: '当前播放列表为空',
+        });
+      }
     };
     // 关闭歌词界面
     const closeHandler = () => {
       isOpen.value = false;
     };
+    // 打开抽屉时的回调函数
+    const drawerOpen = async () => {};
     const likerClick = () => {
       Message({
         type: 'info',
@@ -190,6 +218,7 @@ export default defineComponent({
       isRender,
       clickProgressArea,
       draggerDot,
+      drawerOpen,
     };
   },
 });

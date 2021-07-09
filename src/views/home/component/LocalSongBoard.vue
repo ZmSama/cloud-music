@@ -26,22 +26,22 @@
       </div>
       <!-- 可视区域 -->
       <div class="zm-song-board__visibleView">
-        <div class="zm-scroll-view" :style="curSty">
+        <div class="zm-scroll-view" :style="lyricMove">
           <div
             class="zm-scroll-view__item"
-            v-for="(i, index) in wordArr"
+            v-for="(i, index) in musicSource.lyric"
             :key="index"
-            :class="curIndex == index && 'is-active'"
+            :class="currentRow == index && 'is-active'"
           >
-            {{ i }}
+            {{ i.text }}
           </div>
         </div>
       </div>
       <div class="zm-song-board__recommend">
         <div class="show-wrap">
-          <span class="resource">播放来源：本地音乐</span>
-          <div class="include-song-list">包含这首歌的歌单</div>
-          <ul>
+          <!-- <span class="resource">播放来源：本地音乐</span> -->
+          <div class="include-song-list">相似歌曲</div>
+          <ul v-loading="loading_simi">
             <li>
               <div class="icon">
                 <img src="@/assets/img/avater.jpg" alt="" srcset="" />
@@ -123,81 +123,31 @@
     </div>
     <div class="zm-comment">
       <div class="all-comment">
-        <div class="type-name">全部评论（2167）</div>
-        <ul>
-          <li>
+        <div class="type-name">{{ `全部评论（${total}）` }}</div>
+        <ul v-loading="loading">
+          <li v-for="item in comments" :key="item.commentId">
             <div class="icon">
-              <img src="@/assets/img/avater.jpg" alt="" srcset="" />
+              <img :src="item.user?.avatarUrl" alt="" srcset="" />
             </div>
             <div class="commer-option">
               <div class="commer">
-                <span class="user">十年树与花 :</span>
+                <span class="user">{{ item.user.nickname }} :</span>
                 <span class="comments">
-                  这首歌不错这首歌不错这首歌不错这首歌不错这首歌不错这首歌不错这首歌不错这首歌不错这首歌不错这首歌不错这首歌不错这首歌不错这首歌不错这首歌不错这首歌不错这首歌不错这首歌不错
+                  {{ item.content }}
                 </span>
-              </div>
-              <div class="option">
-                <span class="time">2015年1月16日 16:46</span>
-                <div class="interraction">
-                  <div class="start">
-                    <svg-icon name="zan1" color="#ccc" size="15px"></svg-icon>
-                    1026
-                  </div>
-                  <div class="share">
-                    <svg-icon name="fenxiang" color="#ccc" size="15px"></svg-icon>
-                  </div>
-                  <div class="write">
-                    <svg-icon name="pinglunyuanxingx" color="#ccc" size="15px"></svg-icon>
-                  </div>
+                <div class="comment-append" v-if="item.beReplied.length > 0">
+                  <span class="comment-append__user">
+                    {{ '@' + item?.beReplied[0].user.nickname }}
+                  </span>
+                  <span>{{ item?.beReplied[0].content }}</span>
                 </div>
               </div>
-            </div>
-          </li>
-          <li>
-            <div class="icon">
-              <img src="@/assets/img/avater.jpg" alt="" srcset="" />
-            </div>
-            <div class="commer-option">
-              <div class="commer">
-                <span class="user">遗憾循环 :</span>
-                <span class="comments">
-                  百里登风，皓月满空。。想起了那个叫月满空的大侠。第一次看还以为月满空就是主角，结果看的我目瞪口呆，没3分钟就挂了，还成了中国动漫史上第一位打马赛克的人物。。。
-                </span>
-              </div>
               <div class="option">
-                <span class="time">2015年1月16日 16:46</span>
+                <span class="time">{{ commentDateFormat(item.time) }}</span>
                 <div class="interraction">
                   <div class="start">
                     <svg-icon name="zan1" color="#ccc" size="15px"></svg-icon>
-                    1026
-                  </div>
-                  <div class="share">
-                    <svg-icon name="fenxiang" color="#ccc" size="15px"></svg-icon>
-                  </div>
-                  <div class="write">
-                    <svg-icon name="pinglunyuanxingx" color="#ccc" size="15px"></svg-icon>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </li>
-          <li v-for="i in 7" :key="i">
-            <div class="icon">
-              <img src="@/assets/img/avater.jpg" alt="" srcset="" />
-            </div>
-            <div class="commer-option">
-              <div class="commer">
-                <span class="user">少吃饭多吃肉 :</span>
-                <span class="comments">
-                  歌词围绕故事主角百里登风踏上江湖，寻找妻子汝嫣的故事主线，讲述了主人翁为了信念浪迹天涯，虽然一路艰险，但仍旧初心不改的心路历程。歌词中虽只字未提“情”之所在、“爱”之所寄，但字里行间流露出的跨越生死的牵挂，却体现出了汪苏泷的用‘’情‘’之深。——文字来源：网易娱乐
-                </span>
-              </div>
-              <div class="option">
-                <span class="time">2015年1月16日 16:46</span>
-                <div class="interraction">
-                  <div class="start">
-                    <svg-icon name="zan1" color="#ccc" size="15px"></svg-icon>
-                    1026
+                    {{ item.likedCount }}
                   </div>
                   <div class="share">
                     <svg-icon name="fenxiang" color="#ccc" size="15px"></svg-icon>
@@ -210,17 +160,14 @@
             </div>
           </li>
         </ul>
-
         <div class="load-more">
-          <zm-pagination
-            :total="page.total"
-            :pageSize="page.size"
-            :currentPage="page.index"
-            @currentChange="changeHandler"
-          />
-          <!-- <zm-popper-button background="linear-gradient(90deg, #e67e22, #e74c3c)" size="mini">
-            加载更多评论
-          </zm-popper-button> -->
+          <el-pagination
+            background
+            hide-on-single-page
+            @current-change="paginateHandle"
+            layout="prev, pager, next"
+            :total="total"
+          ></el-pagination>
         </div>
       </div>
     </div>
@@ -234,8 +181,8 @@
     <!-- 滚动条有时悬浮的歌名和作者 -->
     <transition name="top-fade">
       <div class="sone-name" v-show="isBackTop">
-        <span class="song-name">寒衫浮梦</span>
-        <span class="artist">双笙</span>
+        <span class="song-name">{{ musicSource?.songName }}</span>
+        <span class="artist">{{ musicSource?.art }}</span>
       </div>
     </transition>
   </div>
@@ -246,8 +193,8 @@ import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } fr
 import { useStore } from '@/store/index';
 import throttle from '@/utils/throttle';
 import { GET_COUNTIRES_LIST } from '@/api/modules/base';
-import { GET_SONG_WORD } from '@/api/modules/searchSong';
-import { log } from 'util';
+import { GET_SONG_COMMENT, GET_SIMI_SONG } from '@/api/modules/music';
+import GloabTools from '@/utils/tools';
 export default defineComponent({
   name: 'LocalSongBoard',
   props: {
@@ -260,59 +207,12 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const { isOpen, id } = props;
-    const wordArr = ref([
-      '作词 : 菌上蚁',
-      '作曲 : 阿坤',
-      '编曲 : 简吟',
-      '混音 : Mr.鱼',
-      '笔落书卷半',
-      '细呷温酒纸墨香',
-      '痕迹潦潦 聆风旖旎',
-      '画浮生一纸水青 未干',
-      '念转凌霄权',
-      '御笔不点寒白衫',
-      '拂袖河山 纵笔江川',
-      '赋此间一抹丹砂 清狂',
-      '兰亭袅袅入凡尘',
-      '行书以鉴当琼月',
-      '锋毫冽冽提宫阙',
-      '白绢为约伊人决',
-      '苍鸟扶之青云兮',
-      '青冢暮而依别离',
-      '羁鹰坠羽寻芜兮',
-      '封笔沉沙以伴渺娉',
-      '伏案倾旧卷',
-      '恍若入梦琴瑟婉',
-      '尘中千叹 何人语堪',
-      '惟作一介寒衫旧 轻叩',
-      '清冽酒坛散',
-      '一梦惊世长安仙',
-      '浅吟轻唱 对错何妨',
-      '唯记一点荧光青 微凉',
-      '兰亭袅袅入凡尘',
-      '行书以鉴当琼月',
-      '锋毫冽冽提宫阙',
-      '白绢为约伊人决',
-      '苍鸟扶之青云兮',
-      '青冢暮而依别离',
-      '羁鹰坠羽寻芜兮',
-      '封笔沉沙以伴娉婷',
-      '渚江清清曳纸莲',
-      '以寄天方姝旧还',
-      '燕谷轻轻拙荆唤',
-      '传以九幽何回荡',
-      '倦眉蹙之终南兮',
-      '风动玲心而愁忆',
-      '悴鬓不觉缃素兮',
-      '沧山映水流年何必',
-      '终不见蛾眉轻舞霓裳 流袖翩跹',
-    ]);
-
     const curIndex = ref(0);
-    const timer = ref(null);
+    const currentRow = ref(0);
+    const lyricMove = ref({ top: '0' });
     const store = useStore();
-    const { play, musicSource } = toRefs(store.state.playModel);
+    const { commentDateFormat } = GloabTools();
+    const { play, musicSource, currentTime } = toRefs(store.state.playModel);
     const isBackTop = ref(false);
     const wrap = ref<HTMLElement>();
     const page = reactive({
@@ -321,9 +221,10 @@ export default defineComponent({
       total: 300,
     });
 
-    const clickMe = () => {
-      curIndex.value++;
-    };
+    const comments = ref([]);
+    const simiSource = ref([]);
+    const loading = ref(false);
+    const loading_simi = ref(false);
 
     // 点击返回页面顶部
     const gotoBackTop = () => {
@@ -338,21 +239,6 @@ export default defineComponent({
       isBackTop.value = false;
     };
 
-    // 得到歌词
-    const getSongWrod = async id => {
-      let res = await GET_SONG_WORD(id);
-      console.log(res);
-    };
-
-    // 歌词滚动样式
-    const curSty = computed(() => {
-      if (curIndex.value > wordArr.value.length) {
-        curIndex.value = 0;
-      } else {
-        return { top: -curIndex.value * 40 + 'px' };
-      }
-    });
-
     // cd动态样式
     const cdClass = computed(() => play.value && 'is-active');
 
@@ -361,26 +247,39 @@ export default defineComponent({
       () => isBackTop.value && { right: '50%', bottom: '150px', transform: 'translateX(50%)' }
     );
 
-    // 开始播放
-    const startPlay = () => {
-      timer.value = setInterval(() => {
-        curIndex.value++;
-      }, 1000);
+    // 得到评论
+    const getCommentList = async () => {
+      loading.value = true;
+      let res = await GET_SONG_COMMENT({
+        id: musicSource.value.id,
+        limit: page.size,
+        offset: page.index,
+      });
+      if (res.data) {
+        loading.value = false;
+        comments.value = res.data.comments;
+        page.total = res.data.total;
+      }
     };
 
-    // 暂停播放
-    const stopPlay = () => {
-      clearInterval(timer.value);
+    // 得到相似歌曲
+    const getSimiSong = async () => {
+      loading_simi.value = true;
+      let res = await GET_SIMI_SONG({ id: musicSource.value.id });
+      if (res.data) {
+        loading_simi.value = false;
+        simiSource.value = res.data.songs;
+      }
     };
 
     // 分页事件
-    const changeHandler = val => {
-      console.log(val);
+    const paginateHandle = val => {
+      page.index = val;
+      getCommentList();
     };
 
     const writeContent = async () => {
       let res = await GET_COUNTIRES_LIST();
-      console.log(res);
     };
 
     // 页面加载完毕时为当前页面绑定滚动事件完成一些界面的UI交互效果
@@ -396,42 +295,38 @@ export default defineComponent({
           }
         })
       );
-      startPlay();
+
+      getCommentList();
+      getSimiSong();
     });
     watch(
-      () => play,
+      () => currentTime.value,
       val => {
-        if (val.value) {
-          startPlay();
-          // getSongWrod(musicSource.value?.id);
-        } else {
-          stopPlay();
-        }
-      },
-      {
-        deep: true,
+        musicSource.value.lyric.forEach((item, index) => {
+          if (val >= item.time) {
+            lyricMove.value.top = -index * 40 + 'px';
+            currentRow.value = index;
+          }
+        });
       }
     );
-
-    watch(
-      () => isOpen,
-      val => {}
-    );
-
     return {
-      clickMe,
-      wordArr,
       curIndex,
-      curSty,
       cdClass,
       isBackTop,
       wrap,
       writeSty,
       gotoBackTop,
-      changeHandler,
-      page,
+      paginateHandle,
+      ...toRefs(page),
       writeContent,
       musicSource,
+      lyricMove,
+      currentRow,
+      loading,
+      comments,
+      commentDateFormat,
+      loading_simi,
     };
   },
 });
@@ -456,7 +351,7 @@ export default defineComponent({
   }
   @include b(song-board) {
     width: 100%;
-    height: 70vh;
+    height: 80vh;
     display: grid;
     grid-template-areas:
       'song song song'
@@ -667,6 +562,18 @@ export default defineComponent({
               }
               .comments {
                 font-size: 15px;
+              }
+              .comment-append {
+                margin-top: 10px;
+                margin-bottom: 10px;
+                font-size: 14px;
+                border-radius: 4px;
+                padding: 10px;
+                background-color: rgb(234, 233, 233);
+                .comment-append__user {
+                  color: rgba(36, 149, 206, 0.9);
+                  padding-right: 5px;
+                }
               }
             }
             .option {

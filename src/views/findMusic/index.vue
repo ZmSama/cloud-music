@@ -6,7 +6,7 @@
 <template>
   <div class="find-music">
     <tabs>
-      <tab-pane label="个性推荐" height="74vh">
+      <tab-pane label="个性推荐" height="84vh">
         <div class="zm-personalized">
           <Personalized :source="source" />
         </div>

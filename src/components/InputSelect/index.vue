@@ -11,7 +11,13 @@
     <div class="zm-input__placeholder" v-show="!isFocus && !inputContent">
       <span>搜索</span>
     </div>
-    <input type="text" v-model="inputContent" @focus="inputFocusHandler" @click.stop="" />
+    <input
+      type="text"
+      v-model="inputContent"
+      @keydown="inputKeyDown"
+      @focus="inputFocusHandler"
+      @click.stop=""
+    />
     <div class="zm-input__suffix" v-show="inputContent" @click.stop="cleanContent">
       <svg-icon name="lajitong" color="#fff" size="15"></svg-icon>
     </div>
@@ -92,6 +98,7 @@ export default defineComponent({
   directives: {
     clickoutside,
   },
+  emits: ['keydown', 'selectHistoryItem'],
   setup(props, { emit }) {
     const { hotdata } = props;
     const listData = ref([]);
@@ -113,6 +120,7 @@ export default defineComponent({
 
     const selectHistoryHandler = (item: any) => {
       emit('selectHistoryItem', item);
+      isFocus.value = false;
     };
 
     const iconColor = (type: string) => {
@@ -123,6 +131,13 @@ export default defineComponent({
           return 'green';
         case 'hot':
           return 'red';
+      }
+    };
+
+    const inputKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Enter') {
+        emit('keydown', inputContent.value);
+        isFocus.value = false;
       }
     };
     return {
@@ -140,6 +155,7 @@ export default defineComponent({
       selectHistoryHandler,
       iconColor,
       listData,
+      inputKeyDown,
     };
   },
 });

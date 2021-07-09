@@ -6,13 +6,14 @@
 import { Module } from 'vuex';
 import { RooteStateType } from '../types';
 import { playModelType } from './type';
-import { IMusicParams } from '@/typs/models/music';
+import { IMusicLyric, IMusicParams } from '@/typs/models/music';
 const playModel: Module<playModelType, RooteStateType> = {
   namespaced: true,
   state: {
     play: false,
     musicSource: null,
     audioRef: null,
+    currentTime: null,
   },
   mutations: {
     // 设置播放器实例
@@ -40,6 +41,14 @@ const playModel: Module<playModelType, RooteStateType> = {
     // 切换状态
     TOGGLE_PLAY_PAUSE(state) {
       state.play = !state.play;
+    },
+    // 设置歌词
+    SET_SONG_LYRIC(state, lyric: IMusicLyric[]) {
+      state.musicSource.lyric = lyric;
+    },
+    // 设置当前播放时间
+    SET_CURRENT_TIME(state, time) {
+      state.currentTime = time;
     },
   },
 };

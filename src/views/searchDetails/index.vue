@@ -26,8 +26,8 @@
         label="音乐标题"
         width="300"
       ></el-table-column>
-      <el-table-column prop="art" label="歌手" width="200"></el-table-column>
-      <el-table-column prop="al" label="专辑"></el-table-column>
+      <el-table-column prop="art" label="歌手" show-overflow-tooltip width="200"></el-table-column>
+      <el-table-column prop="al" label="专辑" show-overflow-tooltip></el-table-column>
       <el-table-column prop="dt" label="时长">
         <template #default="scope">
           <span>{{ dtJudge(scope.row.dt) }}</span>
@@ -44,6 +44,7 @@
     <div class="pagination">
       <el-pagination
         background
+        hide-on-single-page
         @current-change="paginateHandle"
         layout="prev, pager, next"
         :total="total"
@@ -53,9 +54,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, nextTick, reactive, toRefs } from 'vue';
-import { SEARCH_SONG, GET_SONG_BY_ID, GET_SONG_PIC } from '@/api/modules/searchSong';
+import { defineComponent, nextTick, onMounted, reactive, toRefs, watch, watchEffect } from 'vue';
+import { SEARCH_SONG } from '@/api/modules/searchSong';
+import { GET_SONG_BY_ID, GET_SONG_PIC } from '@/api/modules/music';
 import { useStore } from '@/store/index';
+import { useRoute } from 'vue-router';
 export default defineComponent({
   name: 'SearchDetails',
   setup() {
@@ -67,6 +70,7 @@ export default defineComponent({
       size: 30,
     });
     const store = useStore();
+    const route = useRoute();
     const indexMethod = (index: number) => {
       index += 1;
       return index >= 10 ? index : '0' + index;
@@ -79,10 +83,11 @@ export default defineComponent({
       return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
     };
 
-    const searchSong = async () => {
+    // 查询方法
+    const searchSong = async key => {
       state.loading = true;
       let res = await SEARCH_SONG({
-        keywords: '36',
+        keywords: key,
         offset: state.index,
         limit: state.size,
       });
@@ -102,6 +107,7 @@ export default defineComponent({
       }
     };
 
+    // 根据id得到歌曲播放地址和封面
     const getSongByid = async row => {
       // 得到歌曲信息
       Promise.all([GET_SONG_BY_ID({ id: row.id }), GET_SONG_PIC({ ids: row.id })]).then(res => {
@@ -124,14 +130,31 @@ export default defineComponent({
     // 分页方法
     const paginateHandle = page => {
       state.index = page;
-      searchSong();
+      searchSong(route.params.info);
     };
+
+    // 双击播放
     const rowClickHandle = async row => {
       store.commit('playModel/RESET_MUSIC_STATE');
       getSongByid(row);
     };
 
-    searchSong();
+    // onMounted(() => {
+    //   searchSong(route.params.info);
+    // });
+
+    watchEffect(() => {
+      searchSong(route.params.info);
+    });
+
+    // watch(
+    //   () => route.params.info,
+    //   val => {
+    //     console.log(val);
+
+    //     searchSong(val);
+    //   }
+    // );
     return {
       ...toRefs(state),
       indexMethod,
@@ -144,7 +167,7 @@ export default defineComponent({
 </script>
 <style lang="scss" scoped>
 .search-wrap {
-  height: 100%;
+  height: 82vh;
   width: 100%;
   position: relative;
 }

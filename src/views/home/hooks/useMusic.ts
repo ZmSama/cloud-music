@@ -7,7 +7,7 @@ import { reactive, toRefs, computed, onMounted, watch } from 'vue';
 import { useStore } from '@/store/index';
 export function useMusic() {
   const state = reactive({
-    isOpen: true,
+    isOpen: false,
     curIcon: 'bofang2',
     index: 0,
     timer: null,
@@ -71,6 +71,7 @@ export function useMusic() {
       });
       // 得到当前播放的时间
       const currentTime = e.target.currentTime;
+      store.commit('playModel/SET_CURRENT_TIME', currentTime);
       // 相除乘于100后就可以得到百分比数,这个就是进度条的长度
       let progresswidt = (currentTime / duration) * 100;
       // 改变进度条
@@ -80,6 +81,11 @@ export function useMusic() {
       let currSec = Math.floor(currentTime % 60);
       // 改变当前时间
       state.current = `${currMin}:${currSec}`;
+
+      // 播放结束时
+      audioRef.value.addEventListener('pause', () => {
+        store.commit('playModel/PAUSE_MUSIC');
+      });
     });
 
     audioRef.value.addEventListener('progress', e => {
@@ -147,7 +153,6 @@ export function useMusic() {
       }
     }
   );
-
   return {
     getSongTime,
     playMusic,

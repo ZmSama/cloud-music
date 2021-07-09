@@ -19,4 +19,15 @@ export type IMusicParams = {
   songName: string;
   pic: string;
   dt: number;
+  lyric?: Array<IMusicLyric>;
+};
+
+/**
+ * @msg: 歌词属性
+ * @param {*}
+ * @return {*}
+ */
+export type IMusicLyric = {
+  time?: number;
+  text?: string;
 };

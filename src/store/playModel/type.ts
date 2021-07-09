@@ -9,4 +9,5 @@ export interface playModelType {
   play: boolean;
   musicSource: IMusicParams;
   audioRef: HTMLAudioElement;
+  currentTime: number;
 }

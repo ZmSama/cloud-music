@@ -25,23 +25,24 @@
       </menu-group>
     </div>
     <div class="zm-home__main">
-      <router-view v-slot="{ Component }">
+      <router-view v-slot="{ Component }" v-if="isRouterAlive">
         <transition :name="SkipSwitchName">
           <component :is="Component" />
         </transition>
       </router-view>
     </div>
-    <div class="zm-home__footer">
+    <div class="zm-home__footer" :style="playFooter">
       <Footer />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from 'vue';
+import { defineComponent, ref, watch, provide, nextTick, toRefs, computed } from 'vue';
 import Header from './component/Header.vue';
 import Footer from './component/Footer.vue';
 import { useRoute } from 'vue-router';
+import { useStore } from '@/store/index';
 export default defineComponent({
   name: 'Home',
   components: {
@@ -189,7 +190,20 @@ export default defineComponent({
     ];
 
     const SkipSwitchName = ref('');
+    const isRouterAlive = ref(true);
     const route = useRoute();
+    const store = useStore();
+
+    const { play } = toRefs(store.state.playModel);
+
+    const reloadRouter = () => {
+      isRouterAlive.value = false;
+      nextTick(() => (isRouterAlive.value = true));
+    };
+
+    const playFooter = computed(() => play.value && { transform: 'translateY(0)' });
+
+    provide('reload', reloadRouter);
 
     watch(
       () => route.meta,
@@ -205,6 +219,8 @@ export default defineComponent({
     return {
       menuData,
       SkipSwitchName,
+      isRouterAlive,
+      playFooter,
     };
   },
 });
@@ -213,14 +229,14 @@ export default defineComponent({
 @include b(home) {
   width: 100%;
   height: 100%;
-  overflow-x: hidden;
+  overflow: hidden;
   display: grid;
   grid-template-areas:
     'header header'
-    'menu main'
-    'footer footer';
+    'menu main';
   grid-template-columns: 12vw 88vw;
-  grid-template-rows: 6vh 84vh 10vh;
+  grid-template-rows: 6vh 94vh;
+  position: relative;
   @include e(header) {
     grid-area: header;
   }
@@ -251,8 +267,20 @@ export default defineComponent({
     padding: 10px;
   }
   @include e(footer) {
-    grid-area: footer;
+    cursor: pointer;
+    position: absolute;
+    background: red;
+    left: 0;
+    bottom: 0px;
+    height: 10vh;
+    width: 100vw;
     box-shadow: 0px -3px 3px 1px rgba(0, 0, 0, 0.1);
+    transform: translateY(80%);
+    transition: 0.8s transform;
+    z-index: 99999;
+    &:hover {
+      transform: translateY(0);
+    }
   }
 }
 

@@ -17,39 +17,3 @@ export function SEARCH_SONG(params?) {
     params,
   });
 }
-/**
- * @msg: 调用此接口 , 根据id获得音乐
- * @param {*} data
- * @return {*}
- */
-export function GET_SONG_BY_ID(params?) {
-  return request({
-    method: 'GET',
-    url: '/song/url',
-    params,
-  });
-}
-/**
- * @msg: 调用此接口 , 根据id获得音乐的封面
- * @param {*} data
- * @return {*}
- */
-export function GET_SONG_PIC(params?) {
-  return request({
-    method: 'GET',
-    url: '/song/detail',
-    params,
-  });
-}
-/**
- * @msg: 调用此接口 , 根据id获得歌词
- * @param {*} data
- * @return {*}
- */
-export function GET_SONG_WORD(params?) {
-  return request({
-    method: 'GET',
-    url: '/lyric',
-    params,
-  });
-}

@@ -23,6 +23,7 @@
         :historydata="historydata"
         :hotdata="hotdata"
         @selectHistoryItem="selectHistoryItem"
+        @keydown="KedownHandle"
       />
     </div>
 
@@ -80,7 +81,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, toRaw, ref, computed, onMounted } from 'vue';
+import { defineComponent, toRaw, ref, computed, onMounted, inject } from 'vue';
 import clickoutside from '@/directives/clickoutside';
 import CardItem from './CardItem.vue';
 import { useRouter } from 'vue-router';
@@ -171,12 +172,23 @@ export default defineComponent({
     const isOpenUserinfo = ref(false);
 
     const router = useRouter();
+    const reload = inject('reload') as Function;
 
     const selectHistoryItem = (item: any) => {
       router.push({
         name: 'MusicSearchDetails',
       });
-      console.log('当前选择的历史记录是', toRaw(item.value));
+    };
+
+    // 输入确定
+    const KedownHandle = val => {
+      router.push({
+        name: 'MusicSearchDetails',
+        params: {
+          info: val,
+        },
+      });
+      reload();
     };
     const toUserInfo = () => {
       console.log(111);
@@ -213,6 +225,7 @@ export default defineComponent({
       handleCloseDrective,
       gotoUserInfoEdit,
       routerBack,
+      KedownHandle,
     };
   },
 });
