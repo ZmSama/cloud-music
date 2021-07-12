@@ -5,11 +5,19 @@
 -->
 <template>
   <div class="swiper-wrap">
-    <swiper :initial="1" :interval="3000" :auto="true" v-if="bannerList.length > 0">
-      <slider v-for="item in bannerList" :key="item.bannerId">
-        <img :src="item.pic" alt="" srcset="" />
-      </slider>
-    </swiper>
+    <el-skeleton :loading="loading" animated>
+      <template #template>
+        <el-skeleton-item variant="image" style="width: 660px; height: 188px"></el-skeleton-item>
+      </template>
+
+      <template #default>
+        <swiper :initial="1" :interval="3000" :auto="true" v-if="bannerList.length > 0">
+          <slider v-for="item in bannerList" :key="item.bannerId">
+            <img :src="item.pic" alt="" srcset="" />
+          </slider>
+        </swiper>
+      </template>
+    </el-skeleton>
   </div>
 
   <!-- 推荐歌单 -->
@@ -96,7 +104,6 @@ import RecommendMvItem from './RecommendMvItem.vue';
 import Tools from '../utils/index';
 import GloabTools from '@/utils/tools';
 import useApiData from '../hooks/useApiData';
-import { ZmLoading } from '@/components';
 export default defineComponent({
   components: { ZmButton, RecommendMvItem },
   name: 'Personalized',
@@ -124,12 +131,7 @@ export default defineComponent({
     } = useApiData();
 
     const clickHandler = () => {
-      console.log(111);
       loading.value = !loading.value;
-
-      // ZmLoading.service({
-      //   background: 'rgba(0,0,0,0.5)',
-      // });
     };
 
     getBannerData();

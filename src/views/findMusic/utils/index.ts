@@ -26,7 +26,7 @@ export default function Tools() {
    */
   const judgeTodayNum = () => {
     let day = new Date().getDate();
-    return day > 10 ? day : '0' + day;
+    return day >= 10 ? day : '0' + day;
   };
 
   return {

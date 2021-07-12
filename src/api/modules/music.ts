@@ -65,3 +65,15 @@ export function GET_SIMI_SONG(params?) {
     params,
   });
 }
+/**
+ * @msg: 调用此接口 , 得到热搜列表
+ * @param {*} data
+ * @return {*}
+ */
+export function GET_HOT_SEARCH_LIST(params?) {
+  return request({
+    method: 'GET',
+    url: '/search/hot/detail',
+    params,
+  });
+}

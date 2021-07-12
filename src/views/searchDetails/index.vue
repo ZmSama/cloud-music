@@ -12,6 +12,7 @@
       size="mini"
       style="width: 100%"
       max-height="610"
+      empty-text="暂无数据"
       @row-dblclick="rowClickHandle"
     >
       <el-table-column type="index" width="80" :index="indexMethod"></el-table-column>
@@ -139,22 +140,12 @@ export default defineComponent({
       getSongByid(row);
     };
 
-    // onMounted(() => {
-    //   searchSong(route.params.info);
-    // });
-
     watchEffect(() => {
-      searchSong(route.params.info);
+      if (route.params.info) {
+        nextTick(() => searchSong(route.params.info));
+      }
     });
 
-    // watch(
-    //   () => route.params.info,
-    //   val => {
-    //     console.log(val);
-
-    //     searchSong(val);
-    //   }
-    // );
     return {
       ...toRefs(state),
       indexMethod,

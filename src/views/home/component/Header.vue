@@ -20,7 +20,6 @@
       </div>
       <!-- 搜索框 -->
       <input-select
-        :historydata="historydata"
         :hotdata="hotdata"
         @selectHistoryItem="selectHistoryItem"
         @keydown="KedownHandle"
@@ -81,10 +80,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, toRaw, ref, computed, onMounted, inject } from 'vue';
+import { defineComponent, ref, inject } from 'vue';
 import clickoutside from '@/directives/clickoutside';
 import CardItem from './CardItem.vue';
 import { useRouter } from 'vue-router';
+import { GET_HOT_SEARCH_LIST } from '@/api/modules/music';
 export default defineComponent({
   name: 'Header',
   components: {
@@ -94,90 +94,20 @@ export default defineComponent({
     clickoutside,
   },
   setup() {
-    const historydata = [
-      {
-        id: 1,
-        text: '玫瑰花的葬礼',
-      },
-      {
-        id: 2,
-        text: '你的名字',
-      },
-      {
-        id: 3,
-        text: '还是会想你',
-      },
-      {
-        id: 4,
-        text: '日不落',
-      },
-      {
-        id: 5,
-        text: '起风了',
-      },
-      {
-        id: 6,
-        text: 'lover',
-      },
-      {
-        id: 7,
-        text: '娱乐天空',
-      },
-      {
-        id: 8,
-        text: '大城小爱',
-      },
-      {
-        id: 9,
-        text: '花太阳彩虹你',
-      },
-      {
-        id: 10,
-        text: '冰柜',
-      },
-      {
-        id: 11,
-        text: '沦陷',
-      },
-    ];
-    const hotdata = [
-      {
-        id: 1,
-        name: '飘向北方',
-        type: 'new',
-        hotNum: 28455458,
-        des: '梦想在哪里，他们就飘到哪里',
-      },
-      {
-        id: 2,
-        name: '你的名字',
-        type: 'hot',
-        hotNum: 4851555,
-        des: '你的名字，是我一生的故事',
-      },
-      {
-        id: 3,
-        name: '手放开',
-        type: 'up',
-        hotNum: 2860737,
-        des: '你给我最后的疼爱，是手放开',
-      },
-      {
-        id: 3,
-        name: '溯',
-        hotNum: 2527163,
-        des: '慵懒歌曲，失眠首选',
-      },
-    ];
     const isOpenUserinfo = ref(false);
-
+    const hotdata = ref([]);
     const router = useRouter();
     const reload = inject('reload') as Function;
 
+    // 选择历史条目
     const selectHistoryItem = (item: any) => {
       router.push({
         name: 'MusicSearchDetails',
+        params: {
+          info: item,
+        },
       });
+      reload();
     };
 
     // 输入确定
@@ -190,12 +120,12 @@ export default defineComponent({
       });
       reload();
     };
-    const toUserInfo = () => {
-      console.log(111);
-      isOpenUserinfo.value = !isOpenUserinfo.value;
-      // router.push('/userInfo');
-    };
 
+    // 打开用户信息下拉框
+    const toUserInfo = () => {
+      isOpenUserinfo.value = !isOpenUserinfo.value;
+    };
+    // 关闭用户信息下拉框
     const handleCloseDrective = () => {
       isOpenUserinfo.value = false;
     };
@@ -216,9 +146,15 @@ export default defineComponent({
       isOpenUserinfo.value = false;
     };
 
+    // 得到热搜列表
+    const getHotData = async () => {
+      let res = await GET_HOT_SEARCH_LIST();
+      console.log(res);
+
+      hotdata.value = res.data.data;
+    };
+    getHotData();
     return {
-      historydata,
-      hotdata,
       selectHistoryItem,
       toUserInfo,
       isOpenUserinfo,
@@ -226,6 +162,7 @@ export default defineComponent({
       gotoUserInfoEdit,
       routerBack,
       KedownHandle,
+      hotdata,
     };
   },
 });

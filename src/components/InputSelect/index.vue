@@ -16,7 +16,7 @@
       v-model="inputContent"
       @keydown="inputKeyDown"
       @focus="inputFocusHandler"
-      @click.stop=""
+      @click.stop="inputClick"
     />
     <div class="zm-input__suffix" v-show="inputContent" @click.stop="cleanContent">
       <svg-icon name="lajitong" color="#fff" size="15"></svg-icon>
@@ -40,12 +40,12 @@
           <transition-group name="slide-fade">
             <div
               class="option-item"
-              v-for="(item, i) in HistoryBaseData"
-              :key="item.id"
+              v-for="(item, i) in HistoryData"
+              :key="item"
               @click="selectHistoryHandler(item)"
             >
-              <span>{{ item.text }}</span>
-              <div class="hover-icon" @click.stop="deleteHistoryItem(item.id, i)">
+              <span>{{ item }}</span>
+              <div class="hover-icon" @click.stop="deleteHistoryItem(item, i)">
                 <span class="close">+</span>
               </div>
             </div>
@@ -53,23 +53,28 @@
         </div>
         <!-- 热搜榜 -->
         <div class="zm-card__bottom">
-          <div class="hot-item" v-for="(item, index) in listData" :key="item.id">
+          <div
+            class="hot-item"
+            v-for="(item, index) in hotdata"
+            :key="item.searchWord"
+            @click="selectTheHot(item.searchWord)"
+          >
             <div class="hot-item-left">
               <span>{{ index + 1 }}</span>
             </div>
             <div class="hot-item-right">
               <div class="name-heat">
-                <span class="name">{{ item.name }}</span>
+                <span class="name">{{ item.searchWord }}</span>
                 <svg-icon
-                  :name="item.type"
+                  :name="iconType(item.alg)"
                   size="22"
-                  :color="iconColor(item.type)"
-                  v-if="item.type"
+                  :color="iconColor(item.alg)"
+                  v-if="item.alg"
                 />
-                <span class="num">{{ item.hotNum }}</span>
+                <span class="num">{{ item.score }}</span>
               </div>
               <div class="description">
-                <span>{{ item.des }}</span>
+                <span :title="item.content">{{ item.content }}</span>
               </div>
             </div>
           </div>
@@ -83,13 +88,11 @@
 import { defineComponent, ref } from 'vue';
 import clickoutside from '@/directives/clickoutside';
 import useInput from './hook/useInput';
+import { getItem, setItem } from '@/utils/localStorage';
+import { HISTORY_KEY } from '@/utils/local-key';
 export default defineComponent({
   name: 'InputSelect',
   props: {
-    historydata: {
-      type: Array,
-      default: () => [],
-    },
     hotdata: {
       type: Array,
       default: () => [],
@@ -100,9 +103,6 @@ export default defineComponent({
   },
   emits: ['keydown', 'selectHistoryItem'],
   setup(props, { emit }) {
-    const { hotdata } = props;
-    const listData = ref([]);
-    listData.value = hotdata;
     // 输入框相关逻辑
     const {
       isFocus,
@@ -110,13 +110,15 @@ export default defineComponent({
       inputFocusHandler,
       cleanContent,
       handleCloseDrective,
-      HistoryBaseData,
+      HistoryData,
       lookMoreHandler,
       deleteHistoryItem,
       index,
       cleanHistory,
       isLookMore,
-    } = useInput(props.historydata);
+      updateLayout,
+      inputClick,
+    } = useInput();
 
     const selectHistoryHandler = (item: any) => {
       emit('selectHistoryItem', item);
@@ -125,27 +127,73 @@ export default defineComponent({
 
     const iconColor = (type: string) => {
       switch (type) {
-        case 'up':
+        case 'alg_search_rec_hotquery_base_hotquery':
           return 'red';
-        case 'new':
+        case 'featured':
           return 'green';
-        case 'hot':
-          return 'red';
       }
     };
 
-    const inputKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Enter') {
-        emit('keydown', inputContent.value);
-        isFocus.value = false;
+    const iconType = (type: string) => {
+      switch (type) {
+        case 'alg_search_rec_hotquery_base_hotquery':
+          return 'hot';
+        case 'featured':
+          return 'new';
       }
     };
+
+    // 选择热搜
+    const selectTheHot = (key: string) => {
+      isFocus.value = false;
+      getItem(HISTORY_KEY).then((res: any[]) => {
+        let prevContent = res;
+        if (prevContent) {
+          // 寻找是否有相同的
+          let isCom = prevContent.some(item => item === key);
+          if (!isCom) {
+            let arr = [...prevContent, key];
+            // 用户确认了。那就存储入本地，以数组的形式存进去
+            setItem(HISTORY_KEY, arr);
+            updateLayout(6);
+          }
+        } else {
+          setItem(HISTORY_KEY, [key]);
+          updateLayout(6);
+        }
+        emit('keydown', key);
+      });
+    };
+
+    const inputKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        isFocus.value = false;
+        getItem(HISTORY_KEY).then((res: any[]) => {
+          let prevContent = res;
+          if (prevContent) {
+            // 寻找是否有相同的
+            let isCom = prevContent.some(item => item === inputContent.value);
+            if (!isCom) {
+              let arr = [...prevContent, inputContent.value];
+              // 用户确认了。那就存储入本地，以数组的形式存进去
+              setItem(HISTORY_KEY, arr);
+              updateLayout(6);
+            }
+          } else {
+            setItem(HISTORY_KEY, [inputContent.value]);
+            updateLayout(6);
+          }
+          emit('keydown', inputContent.value);
+        });
+      }
+    };
+
     return {
       isFocus,
       inputContent,
       inputFocusHandler,
       handleCloseDrective,
-      HistoryBaseData,
+      HistoryData,
       lookMoreHandler,
       deleteHistoryItem,
       index,
@@ -154,8 +202,10 @@ export default defineComponent({
       isLookMore,
       selectHistoryHandler,
       iconColor,
-      listData,
       inputKeyDown,
+      inputClick,
+      iconType,
+      selectTheHot,
     };
   },
 });
@@ -308,7 +358,11 @@ export default defineComponent({
             }
             .description {
               color: #ccc;
-              font-size: 10px;
+              font-size: 8px;
+              display: -webkit-box;
+              overflow: hidden;
+              -webkit-box-orient: vertical;
+              -webkit-line-clamp: 1;
             }
           }
           &:hover {
