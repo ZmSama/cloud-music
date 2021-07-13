@@ -149,8 +149,6 @@ export default defineComponent({
     // 得到热搜列表
     const getHotData = async () => {
       let res = await GET_HOT_SEARCH_LIST();
-      console.log(res);
-
       hotdata.value = res.data.data;
     };
     getHotData();

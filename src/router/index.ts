@@ -19,6 +19,25 @@ const routes: RouteRecordRaw[] = [
     path: '/findMusic',
     name: 'FindMusic',
     component: () => import('@/views/findMusic/index.vue'),
+    children: [
+      {
+        path: '/songList',
+        name: 'SongList',
+        component: () => import('@/views/findMusic/components/songList/index.vue'),
+        meta: {
+          index: 3,
+        },
+      },
+      {
+        path: '/heightQuality',
+        name: 'HeightQuality',
+        component: () =>
+          import('@/views/findMusic/components/songList/components/heightQuality.vue'),
+        meta: {
+          index: 3,
+        },
+      },
+    ],
     meta: {
       index: 2,
     },

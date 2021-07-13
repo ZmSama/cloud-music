@@ -25,7 +25,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import Tools from '../utils/index';
+import Tools from '../../utils/index';
 import GloabTools from '@/utils/tools';
 export default defineComponent({
   name: 'RecommendMvItem',

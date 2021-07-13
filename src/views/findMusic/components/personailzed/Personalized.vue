@@ -101,18 +101,12 @@
 import ZmButton from '@/components/button/ZmButton.vue';
 import { defineComponent, ref } from 'vue';
 import RecommendMvItem from './RecommendMvItem.vue';
-import Tools from '../utils/index';
+import Tools from '../../utils/index';
 import GloabTools from '@/utils/tools';
-import useApiData from '../hooks/useApiData';
+import useApiData from '../../hooks/useApiData';
 export default defineComponent({
   components: { ZmButton, RecommendMvItem },
   name: 'Personalized',
-  props: {
-    source: {
-      type: Array,
-      default: () => [],
-    },
-  },
   setup() {
     const loading = ref(false);
     const { judgeArist, judgeTodayNum } = Tools();

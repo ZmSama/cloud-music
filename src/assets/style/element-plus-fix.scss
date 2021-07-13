@@ -20,3 +20,21 @@
   background-color: red !important;
   color: #fff;
 }
+
+// tabs页
+.el_tabs__nav {
+  user-select: none;
+}
+.el-tabs__item {
+  font-size: 16px !important;
+}
+.el-tabs__item.is-active {
+  font-weight: 600;
+  color: #000 !important;
+  font-size: 18px !important;
+}
+
+.el-tabs__active-bar {
+  background-color: rgb(255, 47, 47) !important;
+  height: 3px !important;
+}

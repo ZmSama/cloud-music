@@ -5,7 +5,22 @@
 -->
 <template>
   <div class="find-music">
-    <tabs>
+    <el-tabs v-model="activeTabs" @tab-click="tabsClick">
+      <el-tab-pane label="个性推荐" name="personalized">
+        <div class="zm-personalized">
+          <Personalized />
+        </div>
+      </el-tab-pane>
+      <el-tab-pane label="歌单" name="songList">
+        <div class="zm-songlist">
+          <router-view />
+          <!-- <SongList /> -->
+        </div>
+      </el-tab-pane>
+      <el-tab-pane label="角色管理" name="third">角色管理</el-tab-pane>
+      <el-tab-pane label="定时任务补偿" name="fourth">定时任务补偿</el-tab-pane>
+    </el-tabs>
+    <!-- <tabs>
       <tab-pane label="个性推荐" height="84vh">
         <div class="zm-personalized">
           <Personalized :source="source" />
@@ -26,54 +41,36 @@
       <tab-pane label="最新音乐">
         <div>这是最新音乐内容</div>
       </tab-pane>
-    </tabs>
+    </tabs> -->
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import Personalized from './components/Personalized.vue';
+import { useRouter } from 'vue-router';
+import Personalized from './components/personailzed/Personalized.vue';
+import SongList from './components/songList/index.vue';
 export default defineComponent({
   name: 'findMusic',
 
   components: {
     Personalized,
+    SongList,
   },
   setup() {
-    const source = [
-      {
-        id: 1,
-        label: 'Slider1',
-        color: '#ff3399',
-        pic: 'http://p1.music.126.net/O5hmcHHdJpABcArdHOXXZw==/109951166006223055.jpg?imageView&quality=89',
-      },
-      {
-        id: 2,
-        label: 'Slider2',
-        color: '#99ffff',
-        pic: 'http://p1.music.126.net/uhxClMS2xY2b48a-PsoG9g==/109951166006290269.jpg?imageView&quality=89',
-      },
-      {
-        id: 3,
-        label: 'Slider3',
-        color: '#66cc00',
-        pic: 'http://p1.music.126.net/Rgqg8zqkKiewTUMjh0GMCg==/109951166005126541.jpg?imageView&quality=89',
-      },
-      {
-        id: 4,
-        label: 'Slider4',
-        color: '#0066ff',
-        pic: 'http://p1.music.126.net/oMXHYkRHy5XbE0905ljqZg==/109951166005813356.jpg?imageView&quality=89',
-      },
-      {
-        id: 5,
-        label: 'Slider5',
-        color: '#00ff33',
-        pic: 'http://p1.music.126.net/IXXt2TECvZIeEVNUr1E_gA==/109951166004785770.jpg?imageView&quality=89',
-      },
-    ];
+    const activeTabs = ref('songList');
+    const router = useRouter();
+    const tabsClick = tab => {
+      console.log(tab.paneName);
+      if (tab.paneName === 'songList') {
+        router.push({
+          path: 'findMusic/songList',
+        });
+      }
+    };
     return {
-      source,
+      activeTabs,
+      tabsClick,
     };
   },
 });
@@ -85,5 +82,24 @@ export default defineComponent({
 
 @include b(personalized) {
   padding-bottom: 30px;
+  height: 84vh;
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0);
+    border-radius: 3px;
+    padding: 3px 0;
+  }
+  &:hover {
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+@include b(songlist) {
+  @extend .zm-personalized;
 }
 </style>

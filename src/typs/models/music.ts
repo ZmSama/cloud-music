@@ -31,3 +31,9 @@ export type IMusicLyric = {
   time?: number;
   text?: string;
 };
+
+export type ISongList = {
+  name: string;
+  type: number;
+  children?: ISongList[];
+};
