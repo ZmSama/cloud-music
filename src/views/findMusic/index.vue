@@ -8,13 +8,12 @@
     <el-tabs v-model="activeTabs" @tab-click="tabsClick">
       <el-tab-pane label="个性推荐" name="personalized">
         <div class="zm-personalized">
-          <Personalized />
+          <router-view name="personalized" />
         </div>
       </el-tab-pane>
       <el-tab-pane label="歌单" name="songList">
         <div class="zm-songlist">
           <router-view />
-          <!-- <SongList /> -->
         </div>
       </el-tab-pane>
       <el-tab-pane label="角色管理" name="third">角色管理</el-tab-pane>
@@ -48,15 +47,8 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import Personalized from './components/personailzed/Personalized.vue';
-import SongList from './components/songList/index.vue';
 export default defineComponent({
   name: 'findMusic',
-
-  components: {
-    Personalized,
-    SongList,
-  },
   setup() {
     const activeTabs = ref('songList');
     const router = useRouter();
@@ -64,7 +56,11 @@ export default defineComponent({
       console.log(tab.paneName);
       if (tab.paneName === 'songList') {
         router.push({
-          path: 'findMusic/songList',
+          name: 'SongList',
+        });
+      } else if (tab.paneName === 'personalized') {
+        router.push({
+          name: 'Personalized',
         });
       }
     };

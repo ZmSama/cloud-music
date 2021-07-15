@@ -11,7 +11,7 @@
       </template>
 
       <template #default>
-        <swiper :initial="1" :interval="3000" :auto="true" v-if="bannerList.length > 0">
+        <swiper :initial="1" :interval="6000" :auto="true" v-if="bannerList.length > 0">
           <slider v-for="item in bannerList" :key="item.bannerId">
             <img :src="item.pic" alt="" srcset="" />
           </slider>

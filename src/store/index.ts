@@ -7,6 +7,7 @@ import { createStore, useStore as baseUseStore, Store } from 'vuex';
 import { InjectionKey } from 'vue';
 import { RooteStateType } from './types';
 import playModel from './playModel/index';
+import userModel from './userModel/index';
 
 // 定义 injection key
 export const key: InjectionKey<Store<RooteStateType>> = Symbol();
@@ -14,6 +15,7 @@ export const key: InjectionKey<Store<RooteStateType>> = Symbol();
 export const store = createStore<RooteStateType>({
   modules: {
     playModel,
+    userModel,
   },
 });
 

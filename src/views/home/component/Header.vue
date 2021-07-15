@@ -29,9 +29,11 @@
     <!-- 用户区域 -->
     <div class="zm-userinfo">
       <div class="zm-userinfo__avater">
-        <img src="@/assets/img/avater.jpg" alt="" srcset="" />
+        <el-avatar size="medium" :src="avater" icon="el-icon-user"></el-avatar>
       </div>
-      <div class="zm-userinfo__username" @click.stop="toUserInfo">廖子默</div>
+      <div class="zm-userinfo__username" @click.stop="toUserInfo">
+        {{ userInfo ? userInfo.name : '未登录' }}
+      </div>
       <div class="zm-userinfo__them">
         <svg-icon name="them" size="22" color="#fff" />
       </div>
@@ -76,15 +78,97 @@
         </div>
       </transition>
     </div>
+
+    <el-dialog v-model="isOpenLogin" @close="loginBoxClose" :modal="false" width="400px" center>
+      <div class="login-card">
+        <div class="in-card" v-if="isQrCodeType">
+          <div class="title">
+            <span>扫码登陆</span>
+          </div>
+          <div class="show-box">
+            <div class="left-cover">
+              <img src="@/assets/img/saoma.png" alt="" />
+            </div>
+            <div class="qrcode">
+              <div class="code">
+                <img :src="qrcode" alt="" />
+              </div>
+              <span>使用网易云APP扫码登陆</span>
+            </div>
+            <!-- 这里是二维码过期之后出现 -->
+            <div class="timeout-tips" v-if="isTimeout">
+              <span>二维码已失效</span>
+              <div>点击刷新</div>
+            </div>
+          </div>
+
+          <div class="bottom" @click="changeLoginType">
+            <span>选择其他登陆方式</span>
+            <i class="el-icon-s-promotion"></i>
+          </div>
+        </div>
+
+        <div class="in-card" v-else>
+          <div class="top-button" v-if="isRegister" @click="toggleLogin">
+            <i class="iconfont icon-prev"></i>
+            <span>返回登陆</span>
+          </div>
+          <div class="top-icon">
+            <img src="@/assets/img/login-phone.png" alt="" />
+          </div>
+          <div class="form">
+            <el-form ref="form" label-width="0px">
+              <el-form-item>
+                <el-input placeholder="请输入手机号" prefix-icon="el-icon-phone"></el-input>
+              </el-form-item>
+              <el-form-item>
+                <el-input
+                  v-if="!isRegister"
+                  prefix-icon="el-icon-lock"
+                  placeholder="请输入密码"
+                  show-password
+                ></el-input>
+                <el-input
+                  v-else
+                  prefix-icon="el-icon-lock"
+                  placeholder="请设置密码"
+                  show-password
+                ></el-input>
+              </el-form-item>
+              <el-form-item style="text-align: left" v-if="!isRegister">
+                <el-checkbox fill="rgb(255,47,47)">记住密码</el-checkbox>
+              </el-form-item>
+
+              <el-form-item style="text-align: center">
+                <el-button class="customer-button">
+                  {{ isRegister ? '注 册' : '登 陆' }}
+                </el-button>
+              </el-form-item>
+              <el-form-item style="text-align: center" v-if="!isRegister">
+                <a href="#" @click="toggleRegister">注册</a>
+              </el-form-item>
+            </el-form>
+          </div>
+          <div class="bottom-code" @click="toggleQrLogin">
+            <i class="iconfont icon-ico"></i>
+            <span>返回扫码登陆</span>
+          </div>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, inject } from 'vue';
+import { defineComponent, watch, inject, reactive, toRefs, onUnmounted } from 'vue';
 import clickoutside from '@/directives/clickoutside';
 import CardItem from './CardItem.vue';
 import { useRouter } from 'vue-router';
+import { useStore } from '@/store/index';
 import { GET_HOT_SEARCH_LIST } from '@/api/modules/music';
+import { GET_QR_KEY, CREATE_QR_CODE_BY_KEY, LOOP_CHECK_QRCODE } from '@/api/modules/user';
+import { setItem } from '@/utils/localStorage';
+import { COOKIE_KEY } from '@/utils/local-key';
 export default defineComponent({
   name: 'Header',
   components: {
@@ -94,10 +178,25 @@ export default defineComponent({
     clickoutside,
   },
   setup() {
-    const isOpenUserinfo = ref(false);
-    const hotdata = ref([]);
     const router = useRouter();
     const reload = inject('reload') as Function;
+
+    const state = reactive({
+      isOpenUserinfo: false,
+      isOpenLogin: false,
+      isQrCodeType: true,
+      isRegister: false,
+      isTimeout: false,
+      countryCode: '',
+      hotdata: [],
+      avater: '',
+      qrcode: '',
+      key: '',
+      timer: null,
+    });
+
+    const store = useStore();
+    const userInfo = store.state.userModel.info;
 
     // 选择历史条目
     const selectHistoryItem = (item: any) => {
@@ -121,13 +220,22 @@ export default defineComponent({
       reload();
     };
 
-    // 打开用户信息下拉框
+    // 打开用户信息下拉框,如果不是登陆状态那就要加载打开登陆框
     const toUserInfo = () => {
-      isOpenUserinfo.value = !isOpenUserinfo.value;
+      if (userInfo) {
+        state.isOpenUserinfo = !state.isOpenUserinfo;
+      } else {
+        state.isOpenLogin = true;
+        // 此时加载一个key，用来生成二维码的key
+        getQrKey().then((res: string) => {
+          getQrcodeByKey(res);
+        });
+      }
     };
     // 关闭用户信息下拉框
     const handleCloseDrective = () => {
-      isOpenUserinfo.value = false;
+      state.isOpenUserinfo = false;
+      state.isOpenLogin = false;
     };
 
     // 路由返回
@@ -143,24 +251,115 @@ export default defineComponent({
           uid: 1,
         },
       });
-      isOpenUserinfo.value = false;
+      state.isOpenUserinfo = false;
     };
 
     // 得到热搜列表
     const getHotData = async () => {
       let res = await GET_HOT_SEARCH_LIST();
-      hotdata.value = res.data.data;
+      state.hotdata = res.data.data;
     };
+
+    // 改变登陆方式
+    const changeLoginType = () => {
+      state.isQrCodeType = false;
+    };
+
+    // 切换到注册状态
+    const toggleRegister = () => {
+      state.isRegister = true;
+    };
+    // 切换到登陆状态
+    const toggleLogin = () => {
+      state.isRegister = false;
+    };
+    // 切换回二维码登录
+    const toggleQrLogin = () => {
+      state.isQrCodeType = true;
+    };
+
+    // 得到key
+    const getQrKey = async () => {
+      let res = await GET_QR_KEY();
+      if (res.data) {
+        state.key = res.data.data.unikey;
+        return new Promise(resolve => {
+          resolve(res.data.data.unikey);
+        });
+      }
+    };
+
+    // 根据key得到二维码
+    const getQrcodeByKey = async (key: string) => {
+      let res = await CREATE_QR_CODE_BY_KEY({
+        key,
+        qrimg: true,
+      });
+      if (res.data) {
+        state.qrcode = res.data.data.qrimg;
+      }
+    };
+
+    // 根据生成的key轮询校验二维码状态
+    const loopCheckKye = async (key: string) => {
+      let res = await LOOP_CHECK_QRCODE({
+        key,
+      });
+      // 检测状态
+      if (res.data.code === 800) {
+        // 过期了
+        state.isTimeout = true;
+      } else if (res.data.code === 803) {
+        // 授权成功了，成功登陆，清除定时器
+        clearInterval(state.timer);
+        state.timer = null;
+        // 保留这个cookie
+        setItem(COOKIE_KEY, res.data.cookie);
+        // 关闭这个登陆框
+        state.isOpenLogin = false;
+      }
+    };
+
+    // 登陆卡片关闭时重置一些状态
+    const loginBoxClose = () => {
+      clearInterval(state.timer);
+      state.timer = null;
+      state.isQrCodeType = true;
+      state.isRegister = false;
+      state.isTimeout = false;
+    };
+
+    // 监听二维码，轮询一个校验二维码状态的接口
+    watch(
+      () => state.qrcode,
+      () => {
+        state.timer = setInterval(() => {
+          loopCheckKye(state.key);
+        }, 1000);
+      }
+    );
+    onUnmounted(() => {
+      clearInterval(state.timer);
+      state.timer = null;
+    });
+
+    // 根据key得到
+
     getHotData();
     return {
       selectHistoryItem,
       toUserInfo,
-      isOpenUserinfo,
       handleCloseDrective,
       gotoUserInfoEdit,
       routerBack,
       KedownHandle,
-      hotdata,
+      ...toRefs(state),
+      userInfo,
+      changeLoginType,
+      toggleRegister,
+      toggleLogin,
+      toggleQrLogin,
+      loginBoxClose,
     };
   },
 });
@@ -332,6 +531,148 @@ export default defineComponent({
     @extend .zm-router__prev;
     transform: rotate(180deg);
     margin-left: 10px;
+  }
+}
+
+.login-card {
+  width: 100%;
+  height: 600px;
+  @include jcc-aic;
+  flex-direction: column;
+  position: relative;
+  .in-card {
+    width: 100%;
+    height: 600px;
+    @include jcc-aic;
+    flex-direction: column;
+    position: relative;
+    .title {
+      font-size: 26px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .show-box {
+      height: 60%;
+      width: 80%;
+      @include jcc-aic-row;
+      cursor: pointer;
+      position: relative;
+      z-index: 0;
+      &:hover .left-cover {
+        transition: 0.6s all;
+        transform: translate(-100%, -50%);
+        opacity: 1;
+      }
+      &:hover .qrcode {
+        transition: 0.6s all;
+        transform: translate(-20%, -50%) scale(0.6);
+      }
+      .left-cover {
+        width: auto;
+        height: 100%;
+        opacity: 0;
+        background-color: blueviolet;
+        box-sizing: border-box;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        transition: 0.6s all;
+        img {
+          object-fit: cover;
+        }
+      }
+      .qrcode {
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        transition: 0.6s all ease-out;
+        @include jcc-aic;
+        flex-direction: column;
+        .code {
+          width: 350px;
+          height: 350px;
+          position: relative;
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+        }
+        span {
+          font-size: 18px;
+          padding-top: 10px;
+        }
+      }
+      .timeout-tips {
+        position: absolute;
+        left: -15px;
+        top: -15px;
+        right: -15px;
+        bottom: -15px;
+        background-color: rgba(0, 0, 0, 0.7);
+        @include jcc-aic;
+        flex-direction: column;
+        z-index: 2;
+        span {
+          font-size: 20px;
+          color: #fff;
+        }
+        div {
+          margin-top: 10px;
+          padding: 10px 20px;
+          font-size: 16px;
+          color: #fff;
+          border-radius: 6px;
+          background: rgb(12, 115, 194);
+        }
+      }
+    }
+    .bottom {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      cursor: pointer;
+    }
+    .top-icon {
+      top: 10px;
+    }
+    .form {
+      margin-top: 30px;
+      width: 70%;
+      .customer-button {
+        background-color: rgb(255, 47, 47);
+        color: #fff;
+        font-size: 18px;
+        width: 100%;
+      }
+      a {
+        color: #000;
+      }
+    }
+    .bottom-code {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      @include jcc-aic-row;
+      cursor: pointer;
+      i {
+        font-size: 30px;
+        color: red;
+      }
+    }
+    .top-button {
+      position: absolute;
+      left: 0;
+      top: 0;
+      @include jcc-aic-row;
+      cursor: pointer;
+    }
   }
 }
 

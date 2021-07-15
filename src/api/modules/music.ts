@@ -125,3 +125,15 @@ export function GET_SONG_LIST_HEIGHT_QUALITY(params?) {
     params,
   });
 }
+/**
+ * @msg: 调用此接口 , 得到歌单详情
+ * @param {*} data
+ * @return {*}
+ */
+export function GET_SONG_LIST_DETAILS(params?) {
+  return request({
+    method: 'GET',
+    url: '/playlist/detail',
+    params,
+  });
+}

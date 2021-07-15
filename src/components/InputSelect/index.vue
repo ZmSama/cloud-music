@@ -65,12 +65,9 @@
             <div class="hot-item-right">
               <div class="name-heat">
                 <span class="name">{{ item.searchWord }}</span>
-                <svg-icon
-                  :name="iconType(item.alg)"
-                  size="22"
-                  :color="iconColor(item.alg)"
-                  v-if="item.alg"
-                />
+                <div class="icon" v-if="item.iconUrl">
+                  <img :src="item.iconUrl" alt="" />
+                </div>
                 <span class="num">{{ item.score }}</span>
               </div>
               <div class="description">
@@ -350,6 +347,15 @@ export default defineComponent({
               .name {
                 font-weight: 600;
                 padding-right: 5px;
+              }
+              .icon {
+                width: 30px;
+                height: 20px;
+                img {
+                  width: 100%;
+                  height: 100%;
+                  object-fit: contain;
+                }
               }
               .num {
                 color: #ccc;

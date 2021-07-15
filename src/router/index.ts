@@ -6,6 +6,7 @@
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router';
 import userRoterList from './model/user';
 import musicRoterList from './model/music';
+import Personalized from '@/views/findMusic/components/personalized/Personalized.vue';
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
@@ -21,7 +22,15 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/findMusic/index.vue'),
     children: [
       {
-        path: '/songList',
+        path: 'personalized',
+        name: 'Personalized',
+        components: {
+          default: Personalized,
+          personalized: Personalized,
+        },
+      },
+      {
+        path: 'songList',
         name: 'SongList',
         component: () => import('@/views/findMusic/components/songList/index.vue'),
         meta: {
@@ -29,7 +38,7 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
-        path: '/heightQuality',
+        path: 'heightQuality',
         name: 'HeightQuality',
         component: () =>
           import('@/views/findMusic/components/songList/components/heightQuality.vue'),

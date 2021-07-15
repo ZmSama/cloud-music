@@ -17,7 +17,7 @@
       <img :src="qualityList[0].coverImgUrl" alt="" />
     </div>
     <div class="info">
-      <div class="inbutton">
+      <div class="inbutton" @click="toHeightQuality">
         <i class="iconfont icon-VIP"></i>
         <span>精品歌单</span>
       </div>
@@ -88,6 +88,7 @@ import {
   GET_SONG_LIST_HEIGHT_QUALITY,
 } from '@/api/modules/music';
 import GloabTools from '@/utils/tools';
+import { useRouter } from 'vue-router';
 export default defineComponent({
   name: 'SongList',
   components: {
@@ -109,6 +110,7 @@ export default defineComponent({
       qualityList: [],
     });
     const { judgePayCount } = GloabTools();
+    const router = useRouter();
 
     // 选择歌单类型
     const typeSelect = val => {
@@ -158,6 +160,16 @@ export default defineComponent({
       state.page.index = val;
       getListByType(state.curType);
     };
+
+    // 去精品歌单界面
+    const toHeightQuality = () => {
+      router.push({
+        name: 'HeightQuality',
+        query: {
+          type: state.curType,
+        },
+      });
+    };
     getListByType('');
     getHeightQualityType();
     return {
@@ -165,6 +177,7 @@ export default defineComponent({
       ...toRefs(state),
       judgePayCount,
       paginateHandle,
+      toHeightQuality,
     };
   },
 });
