@@ -41,7 +41,12 @@
           <span>每日歌曲推荐</span>
         </div>
       </div>
-      <div class="list-item" v-for="item in recomendList" :key="item.id">
+      <div
+        class="list-item"
+        v-for="item in recomendList"
+        :key="item.id"
+        @click="toSongDetailsList(item.id)"
+      >
         <div class="cover-img">
           <img :src="item.picUrl" alt="55555" :title="item.des" />
           <div class="icon">
@@ -104,6 +109,7 @@ import RecommendMvItem from './RecommendMvItem.vue';
 import Tools from '../../utils/index';
 import GloabTools from '@/utils/tools';
 import useApiData from '../../hooks/useApiData';
+import { useRouter } from 'vue-router';
 export default defineComponent({
   components: { ZmButton, RecommendMvItem },
   name: 'Personalized',
@@ -111,6 +117,7 @@ export default defineComponent({
     const loading = ref(false);
     const { judgeArist, judgeTodayNum } = Tools();
     const { judgePayCount } = GloabTools();
+    const router = useRouter();
     const {
       getBannerData,
       getPersonalizedData,
@@ -126,6 +133,16 @@ export default defineComponent({
 
     const clickHandler = () => {
       loading.value = !loading.value;
+    };
+
+    // 去歌单详情页
+    const toSongDetailsList = (id: number) => {
+      router.push({
+        name: 'SongDetailsList',
+        query: {
+          id: id,
+        },
+      });
     };
 
     getBannerData();
@@ -144,6 +161,7 @@ export default defineComponent({
       judgeTodayNum,
       clickHandler,
       loading,
+      toSongDetailsList,
     };
   },
 });

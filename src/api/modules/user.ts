@@ -41,3 +41,39 @@ export function LOOP_CHECK_QRCODE(params?) {
     params,
   });
 }
+/**
+ * @msg: 调用此接口 , 检查登陆状态(必须有cookie，否则返回空内容)
+ * @param {*} data
+ * @return {*}
+ */
+export function GET_LOGIN_STATUS(params?) {
+  return request({
+    method: 'GET',
+    url: '/login/status',
+    params,
+  });
+}
+/**
+ * @msg: 调用此接口 , 获得用户歌单、收藏、mv、dj数量(必须有cookie，否则返回空内容)
+ * @param {*} data
+ * @return {*}
+ */
+export function GET_USER_INFO(params?) {
+  return request({
+    method: 'GET',
+    url: '/user/subcount',
+    params,
+  });
+}
+/**
+ * @msg: 调用此接口 , 获得用户歌单信息(必须有cookie，否则返回空内容)
+ * @param {*} data
+ * @return {*}
+ */
+export function GET_USER_SONG_LIST(params?) {
+  return request({
+    method: 'GET',
+    url: '/user/playlist',
+    params,
+  });
+}

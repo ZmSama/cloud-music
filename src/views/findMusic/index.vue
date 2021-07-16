@@ -19,28 +19,6 @@
       <el-tab-pane label="角色管理" name="third">角色管理</el-tab-pane>
       <el-tab-pane label="定时任务补偿" name="fourth">定时任务补偿</el-tab-pane>
     </el-tabs>
-    <!-- <tabs>
-      <tab-pane label="个性推荐" height="84vh">
-        <div class="zm-personalized">
-          <Personalized :source="source" />
-        </div>
-      </tab-pane>
-      <tab-pane label="歌单">
-        <div>这是歌单内容</div>
-      </tab-pane>
-      <tab-pane label="主播电台">
-        <div>这是主播电台内容</div>
-      </tab-pane>
-      <tab-pane label="排行榜">
-        <div>这是排行榜内容</div>
-      </tab-pane>
-      <tab-pane label="歌手">
-        <div>这是歌手内容</div>
-      </tab-pane>
-      <tab-pane label="最新音乐">
-        <div>这是最新音乐内容</div>
-      </tab-pane>
-    </tabs> -->
   </div>
 </template>
 
@@ -50,7 +28,7 @@ import { useRouter } from 'vue-router';
 export default defineComponent({
   name: 'findMusic',
   setup() {
-    const activeTabs = ref('songList');
+    const activeTabs = ref('personalized');
     const router = useRouter();
     const tabsClick = tab => {
       console.log(tab.paneName);

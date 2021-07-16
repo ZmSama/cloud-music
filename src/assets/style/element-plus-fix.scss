@@ -38,3 +38,26 @@
   background-color: rgb(255, 47, 47) !important;
   height: 3px !important;
 }
+
+// menu样式
+.el-menu {
+  border-right: none;
+}
+
+.el-menu-item {
+  font-size: 18px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.el-menu-item-group > ul > .el-menu-item {
+  padding-left: 10px !important;
+}
+.el-submenu__title * {
+  color: #ccc;
+}
+.el-menu-item.is-active {
+  color: #000000;
+  background-color: rgb(246, 246, 247);
+}

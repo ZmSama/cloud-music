@@ -13,6 +13,14 @@ const musicRoterList: RouteRecordRaw[] = [
       index: 3,
     },
   },
+  {
+    path: '/song-details-list',
+    name: 'SongDetailsList',
+    component: () => import('@/views/songDetailsList/index.vue'),
+    meta: {
+      index: 3,
+    },
+  },
 ];
 
 export default musicRoterList;

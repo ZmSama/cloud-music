@@ -12,5 +12,9 @@ const HISTORY_KEY = 'history_key';
  * @msg: 输入框的历史数据
  */
 const COOKIE_KEY = 'cookie_key';
+/**
+ * @msg: 用户信息
+ */
+const USER_INFO_KEY = 'user_info_key';
 
-export { HISTORY_KEY, COOKIE_KEY };
+export { HISTORY_KEY, COOKIE_KEY, USER_INFO_KEY };

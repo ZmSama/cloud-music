@@ -9,20 +9,86 @@
       <Header />
     </div>
     <div class="zm-home__menu">
-      <menu-group>
-        <Menu :title="item.title" v-for="item in menuData" :key="item.id">
-          <menu-item
-            size="normal"
-            :icon="item2.icon"
-            :index="item2.index"
-            :routeKey="item2.route"
-            v-for="item2 in item.children"
-            :key="item2.id"
-          >
-            {{ item2.label }}
-          </menu-item>
-        </Menu>
-      </menu-group>
+      <el-menu default-active="1">
+        <el-menu-item index="1">
+          <template #title>发现音乐</template>
+        </el-menu-item>
+        <el-menu-item index="2">
+          <template #title>视频</template>
+        </el-menu-item>
+        <el-menu-item index="3">
+          <template #title>朋友</template>
+        </el-menu-item>
+        <el-menu-item index="4">
+          <template #title>直播</template>
+        </el-menu-item>
+        <el-menu-item index="5" v-if="info">
+          <template #title>私人FM</template>
+        </el-menu-item>
+        <el-submenu index="6">
+          <template #title>
+            <span>我的音乐</span>
+          </template>
+          <el-menu-item-group>
+            <el-menu-item index="6-1">
+              <i class="iconfont icon-yinyue"></i>
+              本地音乐
+            </el-menu-item>
+            <el-menu-item index="6-2">
+              <i class="iconfont icon-xiazai1"></i>
+              下载管理
+            </el-menu-item>
+            <el-menu-item index="6-3">
+              <i class="iconfont icon-rili2"></i>
+              最近播放
+            </el-menu-item>
+            <template v-if="info">
+              <el-menu-item index="6-4">
+                <i class="iconfont icon-yun"></i>
+                我的音乐云盘
+              </el-menu-item>
+              <el-menu-item index="6-5">
+                <i class="iconfont icon-diantai"></i>
+                我的电台
+              </el-menu-item>
+              <el-menu-item index="6-6">
+                <i class="iconfont icon-shoucang"></i>
+                我的收藏
+              </el-menu-item>
+            </template>
+          </el-menu-item-group>
+        </el-submenu>
+        <el-submenu index="7">
+          <template #title>
+            <span>创建的歌单</span>
+          </template>
+          <el-menu-item-group>
+            <el-menu-item
+              v-for="(item, index) in createList"
+              :key="item.id"
+              :index="'7-' + (index + 1)"
+            >
+              <i class="iconfont icon-gedan"></i>
+              {{ item.name }}
+            </el-menu-item>
+          </el-menu-item-group>
+        </el-submenu>
+        <el-submenu index="8" v-if="info">
+          <template #title>
+            <span>收藏的歌单</span>
+          </template>
+          <el-menu-item-group>
+            <el-menu-item
+              v-for="(item, index) in collectList"
+              :key="item.id"
+              :index="'8-' + (index + 1)"
+            >
+              <i class="iconfont icon-gedan"></i>
+              {{ item.name }}
+            </el-menu-item>
+          </el-menu-item-group>
+        </el-submenu>
+      </el-menu>
     </div>
     <div class="zm-home__main">
       <router-view v-slot="{ Component }" v-if="isRouterAlive">
@@ -38,11 +104,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, provide, nextTick, toRefs, computed } from 'vue';
+import { defineComponent, ref, watch, provide, nextTick, toRefs, computed, reactive } from 'vue';
 import Header from './component/Header.vue';
 import Footer from './component/Footer.vue';
 import { useRoute } from 'vue-router';
 import { useStore } from '@/store/index';
+import { GET_USER_SONG_LIST } from '@/api/modules/user';
 export default defineComponent({
   name: 'Home',
   components: {
@@ -50,177 +117,61 @@ export default defineComponent({
     Footer,
   },
   setup() {
-    const menuData = [
-      {
-        title: null,
-        id: 1,
-        children: [
-          {
-            id: 1,
-            label: '发现音乐',
-            route: 'findMusic',
-            index: 1,
-            icon: null,
-          },
-          {
-            id: 2,
-            label: '视频',
-            route: 'video',
-            index: 2,
-            icon: null,
-          },
-          {
-            id: 3,
-            label: '朋友',
-            route: 'friend',
-            index: 3,
-            icon: null,
-          },
-          {
-            id: 4,
-            label: '直播',
-            route: 'live',
-            index: 4,
-            icon: null,
-          },
-          {
-            id: 5,
-            label: '私人FM',
-            route: 'privateFM',
-            index: 5,
-            icon: null,
-          },
-        ],
-      },
-      {
-        title: '我的音乐',
-        id: 2,
-        children: [
-          {
-            id: 6,
-            label: '本地音乐',
-            route: 'localMusic',
-            index: 6,
-            icon: 'yinyue',
-          },
-          {
-            id: 7,
-            label: '下载管理',
-            route: 'downLoad',
-            index: 7,
-            icon: 'xiazai',
-          },
-          {
-            id: 8,
-            label: '我的音乐云盘',
-            route: 'myCloud',
-            index: 8,
-            icon: 'yun',
-          },
-          {
-            id: 9,
-            label: '我的电台',
-            route: 'myBroadcast',
-            index: 9,
-            icon: 'diantai',
-          },
-          {
-            id: 10,
-            label: '我的收藏',
-            route: 'myCollect',
-            index: 10,
-            icon: 'shoucang',
-          },
-        ],
-      },
-      {
-        title: '创建的歌单',
-        id: 3,
-        children: [
-          {
-            id: 11,
-            label: '我喜欢的音乐',
-            route: 'mylike',
-            index: 11,
-            icon: 'heart',
-          },
-          {
-            id: 12,
-            label: '廖子默的2020年度歌单',
-            route: 'mylike',
-            index: 12,
-            icon: 'gedan',
-          },
-          {
-            id: 13,
-            label: '廖子默的2019年度歌单',
-            route: 'mylike',
-            index: 13,
-            icon: 'gedan',
-          },
-        ],
-      },
-      {
-        title: '收藏的歌单',
-        id: 4,
-        children: [
-          {
-            id: 14,
-            label: 'Hanser唱的歌',
-            route: 'mylike',
-            index: 14,
-            icon: 'gedan',
-          },
-          {
-            id: 15,
-            label: '[冷鸟集]',
-            route: 'mylike',
-            index: 15,
-            icon: 'gedan',
-          },
-          {
-            id: 16,
-            label: '看书学习',
-            route: 'mylike',
-            index: 16,
-            icon: 'gedan',
-          },
-        ],
-      },
-    ];
-
-    const SkipSwitchName = ref('');
-    const isRouterAlive = ref(true);
+    const state = reactive({
+      SkipSwitchName: '',
+      isRouterAlive: true,
+      createList: [],
+      collectList: [],
+    });
     const route = useRoute();
     const store = useStore();
 
     const { play } = toRefs(store.state.playModel);
+    const { info } = toRefs(store.state.userModel);
 
-    const reloadRouter = () => {
-      isRouterAlive.value = false;
-      nextTick(() => (isRouterAlive.value = true));
+    // 得到左侧导航的数据（需要登陆），且这里是左侧导航，值渲染前30条数据
+    const getMenuData = async (uid: number) => {
+      let res = await GET_USER_SONG_LIST({ uid });
+      if (res.data) {
+        let playlist = res.data.playlist as any[];
+        // 将里面的创建歌单找出来
+        state.createList = playlist.filter(item => !item.subscribed);
+        // 把收藏歌单找出来
+        state.collectList = playlist.filter(item => item.subscribed);
+      }
     };
 
+    // 重置路由（界面）
+    const reloadRouter = () => {
+      state.isRouterAlive = false;
+      nextTick(() => (state.isRouterAlive = true));
+    };
     const playFooter = computed(() => play.value && { transform: 'translateY(0)' });
 
     provide('reload', reloadRouter);
-
     watch(
       () => route.meta,
       (to: any, from: any) => {
         if (to.index > from.index) {
-          SkipSwitchName.value = 'Skright';
+          state.SkipSwitchName = 'Skright';
         } else {
-          SkipSwitchName.value = 'Skleft';
+          state.SkipSwitchName = 'Skleft';
         }
       }
     );
 
+    watch(
+      () => info.value,
+      val => {
+        if (val) {
+          getMenuData(val.id);
+        }
+      }
+    );
     return {
-      menuData,
-      SkipSwitchName,
-      isRouterAlive,
+      ...toRefs(state),
       playFooter,
+      info,
     };
   },
 });

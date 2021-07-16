@@ -5,7 +5,7 @@
  */
 export interface UserInfo {
   name: string;
-  id: string;
+  id: number;
   avater: string;
   signature: string;
   gender: number;

@@ -35,6 +35,22 @@ $red: rgba(255, 0, 0, 0.816);
   flex-direction: row;
 }
 
+@mixin scroll-bar {
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0);
+    border-radius: 3px;
+    padding: 3px 0;
+  }
+  &:hover {
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
 // elment-plus的bem合成方法
 // BEM
 @mixin b($block) {

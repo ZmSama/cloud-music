@@ -29,12 +29,12 @@
     <!-- 用户区域 -->
     <div class="zm-userinfo">
       <div class="zm-userinfo__avater">
-        <el-avatar size="medium" :src="avater" icon="el-icon-user"></el-avatar>
+        <el-avatar size="medium" :src="info?.avater" icon="el-icon-user"></el-avatar>
       </div>
       <div class="zm-userinfo__username" @click.stop="toUserInfo">
-        {{ userInfo ? userInfo.name : '未登录' }}
+        {{ info ? info.name : '未登录' }}
       </div>
-      <div class="zm-userinfo__them">
+      <div class="zm-userinfo__them" @click="testCookie">
         <svg-icon name="them" size="22" color="#fff" />
       </div>
       <div class="zm-userinfo__message">
@@ -160,15 +160,21 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, watch, inject, reactive, toRefs, onUnmounted } from 'vue';
+import { defineComponent, watch, inject, reactive, toRefs, onUnmounted, onMounted } from 'vue';
 import clickoutside from '@/directives/clickoutside';
 import CardItem from './CardItem.vue';
 import { useRouter } from 'vue-router';
 import { useStore } from '@/store/index';
 import { GET_HOT_SEARCH_LIST } from '@/api/modules/music';
-import { GET_QR_KEY, CREATE_QR_CODE_BY_KEY, LOOP_CHECK_QRCODE } from '@/api/modules/user';
-import { setItem } from '@/utils/localStorage';
-import { COOKIE_KEY } from '@/utils/local-key';
+import {
+  GET_QR_KEY,
+  CREATE_QR_CODE_BY_KEY,
+  LOOP_CHECK_QRCODE,
+  GET_LOGIN_STATUS,
+  GET_USER_SONG_LIST,
+} from '@/api/modules/user';
+import { getItem } from '@/utils/localStorage';
+import { USER_INFO_KEY } from '@/utils/local-key';
 export default defineComponent({
   name: 'Header',
   components: {
@@ -196,7 +202,7 @@ export default defineComponent({
     });
 
     const store = useStore();
-    const userInfo = store.state.userModel.info;
+    const { info } = toRefs(store.state.userModel);
 
     // 选择历史条目
     const selectHistoryItem = (item: any) => {
@@ -222,7 +228,7 @@ export default defineComponent({
 
     // 打开用户信息下拉框,如果不是登陆状态那就要加载打开登陆框
     const toUserInfo = () => {
-      if (userInfo) {
+      if (info.value) {
         state.isOpenUserinfo = !state.isOpenUserinfo;
       } else {
         state.isOpenLogin = true;
@@ -313,10 +319,30 @@ export default defineComponent({
         // 授权成功了，成功登陆，清除定时器
         clearInterval(state.timer);
         state.timer = null;
-        // 保留这个cookie
-        setItem(COOKIE_KEY, res.data.cookie);
         // 关闭这个登陆框
         state.isOpenLogin = false;
+        // 此时再发起一个检查登陆状态的请求，可以得到用户信息
+        checkLoginStatu();
+      }
+    };
+
+    // 检查登陆状态
+    const checkLoginStatu = async () => {
+      let res = await GET_LOGIN_STATUS();
+      // 要这个account有值说明携带了cookie
+      if (res.data.data.account) {
+        let profile = res.data.data.profile;
+        // 在这里提交vuex记录登陆状态，同事要把用户信息持久化到本地
+        let info = {
+          name: profile.nickname,
+          id: profile.userId,
+          avater: profile.avatarUrl,
+          signature: profile.signature,
+          gender: profile.gender,
+          city: profile.city,
+          province: profile.province,
+        };
+        store.commit('userModel/SET_USER_INFO', info);
       }
     };
 
@@ -329,6 +355,11 @@ export default defineComponent({
       state.isTimeout = false;
     };
 
+    const testCookie = async () => {
+      let res = await GET_USER_SONG_LIST({ uid: info.value.id });
+      console.log(res);
+    };
+
     // 监听二维码，轮询一个校验二维码状态的接口
     watch(
       () => state.qrcode,
@@ -338,13 +369,22 @@ export default defineComponent({
         }, 1000);
       }
     );
+
+    //  当页面加载完毕时，检测本地是否有用户信息，有的话加载回vuex
+    onMounted(() => {
+      getItem(USER_INFO_KEY).then(res => {
+        if (res) {
+          store.commit('userModel/SET_USER_INFO', res);
+        }
+      });
+    });
+
     onUnmounted(() => {
       clearInterval(state.timer);
       state.timer = null;
     });
 
     // 根据key得到
-
     getHotData();
     return {
       selectHistoryItem,
@@ -354,12 +394,13 @@ export default defineComponent({
       routerBack,
       KedownHandle,
       ...toRefs(state),
-      userInfo,
+      info,
       changeLoginType,
       toggleRegister,
       toggleLogin,
       toggleQrLogin,
       loginBoxClose,
+      testCookie,
     };
   },
 });
