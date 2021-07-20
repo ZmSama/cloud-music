@@ -60,6 +60,7 @@ import { SEARCH_SONG } from '@/api/modules/searchSong';
 import { GET_SONG_BY_ID, GET_SONG_PIC } from '@/api/modules/music';
 import { useStore } from '@/store/index';
 import { useRoute } from 'vue-router';
+import GloabTools from '@/utils/tools';
 export default defineComponent({
   name: 'SearchDetails',
   setup() {
@@ -72,18 +73,11 @@ export default defineComponent({
     });
     const store = useStore();
     const route = useRoute();
+    const { dtJudge } = GloabTools();
     const indexMethod = (index: number) => {
       index += 1;
       return index >= 10 ? index : '0' + index;
     };
-
-    const dtJudge = (time: number) => {
-      let dt = time / 1000;
-      let m = Math.ceil(dt / 60);
-      let s = Math.ceil(dt % 60);
-      return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
-    };
-
     // 查询方法
     const searchSong = async key => {
       state.loading = true;

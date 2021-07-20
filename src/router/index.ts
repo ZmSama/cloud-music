@@ -15,6 +15,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       index: 1,
     },
+    redirect: '/findMusic/personalized',
   },
   {
     path: '/findMusic',

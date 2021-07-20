@@ -90,10 +90,37 @@ const GloabTools = () => {
     }
   };
 
+  /**
+   * @msg: 格式化成年月日
+   * @param {number} time
+   * @return {*}
+   */
+  const formatDate = (time: number) => {
+    let target = new Date(time);
+    let Y = target.getFullYear();
+    let M = target.getMonth() + 1;
+    let D = target.getDay();
+    return `${Y}-${M}-${D}`;
+  };
+
+  /**
+   * @msg: 将一个秒集合格式化成分：秒
+   * @param {number} time
+   * @return {*}
+   */
+  const dtJudge = (time: number) => {
+    let dt = time / 1000;
+    let m = Math.ceil(dt / 60);
+    let s = Math.ceil(dt % 60);
+    return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
+  };
+
   return {
     judgePayCount,
     formatLyric,
     commentDateFormat,
+    formatDate,
+    dtJudge,
   };
 };
 

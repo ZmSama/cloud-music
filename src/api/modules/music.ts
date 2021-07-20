@@ -137,3 +137,15 @@ export function GET_SONG_LIST_DETAILS(params?) {
     params,
   });
 }
+/**
+ * @msg: 调用此接口 , 传入id串得到音乐数组，用于歌单
+ * @param {*} data
+ * @return {*}
+ */
+export function GET_SONG_LIST_BY_ID_CHAIN(params?) {
+  return request({
+    method: 'GET',
+    url: '/song/detail',
+    params,
+  });
+}
