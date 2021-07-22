@@ -68,11 +68,11 @@ const GloabTools = () => {
   const commentDateFormat = (time: number) => {
     let currentY = new Date().getFullYear();
     let currentM = new Date().getMonth() + 1;
-    let currentD = new Date().getDay();
+    let currentD = new Date().getDate();
     let target = new Date(time);
     let Y = target.getFullYear();
     let M = target.getMonth() + 1;
-    let D = target.getDay();
+    let D = target.getDate();
     let H = target.getHours() > 10 ? target.getHours() : '0' + target.getHours();
     let mm = target.getMinutes() > 10 ? target.getMinutes() : '0' + target.getMinutes();
     if (Y < currentY) {
@@ -99,7 +99,7 @@ const GloabTools = () => {
     let target = new Date(time);
     let Y = target.getFullYear();
     let M = target.getMonth() + 1;
-    let D = target.getDay();
+    let D = target.getDate();
     return `${Y}-${M}-${D}`;
   };
 

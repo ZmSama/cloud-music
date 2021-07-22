@@ -24,6 +24,7 @@ import ZmSelect from './select/index.vue';
 import ZmUpload from './upload/index.vue';
 import ZmPopperButton from './popper_button/index.vue';
 import ZmPagination from './pagination/index.vue';
+import CustomerElPagination from './pagination/index2.vue';
 import ZmLoading from './loading/index';
 import ZmTable from './table/index.vue';
 import ZmTableColumn from './table/table-column/index';
@@ -54,6 +55,7 @@ const COMPONENTS = [
   ZmPagination,
   ZmTable,
   ZmTableColumn,
+  CustomerElPagination,
 ];
 
 ZmSamaUI.install = function (app: App, options) {

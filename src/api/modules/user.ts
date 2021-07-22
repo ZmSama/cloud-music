@@ -77,3 +77,15 @@ export function GET_USER_SONG_LIST(params?) {
     params,
   });
 }
+/**
+ * @msg: 调用此接口 , 使用电话登陆
+ * @param {*} data
+ * @return {*}
+ */
+export function USER_LOGIN_BY_PHONE(params?) {
+  return request({
+    method: 'GET',
+    url: '/login/cellphone',
+    params,
+  });
+}

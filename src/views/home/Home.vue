@@ -186,7 +186,8 @@ export default defineComponent({
     'header header'
     'menu main';
   grid-template-columns: 12vw 88vw;
-  grid-template-rows: 6vh 94vh;
+  grid-template-rows: 6vh 93vh;
+  row-gap: 2px;
   position: relative;
   @include e(header) {
     grid-area: header;
@@ -194,6 +195,7 @@ export default defineComponent({
   @include e(menu) {
     grid-area: menu;
     overflow-y: scroll;
+    margin-top: 1px;
     &::-webkit-scrollbar {
       width: 8px;
     }

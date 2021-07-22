@@ -28,7 +28,7 @@
 
     <!-- 用户区域 -->
     <div class="zm-userinfo">
-      <div class="zm-userinfo__avater">
+      <div class="zm-userinfo__avater" @click="toUserInfoDetails">
         <el-avatar size="medium" :src="info?.avater" icon="el-icon-user"></el-avatar>
       </div>
       <div class="zm-userinfo__username" @click.stop="toUserInfo">
@@ -117,16 +117,21 @@
             <img src="@/assets/img/login-phone.png" alt="" />
           </div>
           <div class="form">
-            <el-form ref="form" label-width="0px">
-              <el-form-item>
-                <el-input placeholder="请输入手机号" prefix-icon="el-icon-phone"></el-input>
+            <el-form ref="formRef" :model="loginFrom" :rules="rules" label-width="0px">
+              <el-form-item prop="phone">
+                <el-input
+                  v-model="loginFrom.phone"
+                  placeholder="请输入手机号"
+                  prefix-icon="el-icon-phone"
+                ></el-input>
               </el-form-item>
-              <el-form-item>
+              <el-form-item prop="password">
                 <el-input
                   v-if="!isRegister"
                   prefix-icon="el-icon-lock"
                   placeholder="请输入密码"
                   show-password
+                  v-model="loginFrom.password"
                 ></el-input>
                 <el-input
                   v-else
@@ -140,7 +145,7 @@
               </el-form-item>
 
               <el-form-item style="text-align: center">
-                <el-button class="customer-button">
+                <el-button class="customer-button" @click="loginOrRegist">
                   {{ isRegister ? '注 册' : '登 陆' }}
                 </el-button>
               </el-form-item>
@@ -160,21 +165,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, watch, inject, reactive, toRefs, onUnmounted, onMounted } from 'vue';
+import { defineComponent, inject, reactive, toRefs, ref } from 'vue';
 import clickoutside from '@/directives/clickoutside';
 import CardItem from './CardItem.vue';
 import { useRouter } from 'vue-router';
-import { useStore } from '@/store/index';
 import { GET_HOT_SEARCH_LIST } from '@/api/modules/music';
-import {
-  GET_QR_KEY,
-  CREATE_QR_CODE_BY_KEY,
-  LOOP_CHECK_QRCODE,
-  GET_LOGIN_STATUS,
-  GET_USER_SONG_LIST,
-} from '@/api/modules/user';
-import { getItem } from '@/utils/localStorage';
-import { USER_INFO_KEY } from '@/utils/local-key';
+import useLogin from '../hooks/useLogin';
+
 export default defineComponent({
   name: 'Header',
   components: {
@@ -185,24 +182,38 @@ export default defineComponent({
   },
   setup() {
     const router = useRouter();
-    const reload = inject('reload') as Function;
-
     const state = reactive({
-      isOpenUserinfo: false,
-      isOpenLogin: false,
-      isQrCodeType: true,
-      isRegister: false,
-      isTimeout: false,
       countryCode: '',
       hotdata: [],
       avater: '',
-      qrcode: '',
-      key: '',
-      timer: null,
     });
-
-    const store = useStore();
-    const { info } = toRefs(store.state.userModel);
+    const formRef = ref<HTMLElement>();
+    const {
+      isOpenUserinfo,
+      isOpenLogin,
+      qrcode,
+      key,
+      isQrCodeType,
+      isRegister,
+      isTimeout,
+      timer,
+      info,
+      loginFrom,
+      toUserInfo,
+      handleCloseDrective,
+      gotoUserInfoEdit,
+      loginBoxClose,
+      toggleRegister,
+      toggleLogin,
+      toggleQrLogin,
+      changeLoginType,
+      loginOrRegist,
+    } = useLogin(formRef);
+    const reload = inject('reload') as Function;
+    const rules = {
+      phone: [{ required: true, message: '请输入电话号码', trigger: 'blur' }],
+      password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+    };
 
     // 选择历史条目
     const selectHistoryItem = (item: any) => {
@@ -225,39 +236,9 @@ export default defineComponent({
       });
       reload();
     };
-
-    // 打开用户信息下拉框,如果不是登陆状态那就要加载打开登陆框
-    const toUserInfo = () => {
-      if (info.value) {
-        state.isOpenUserinfo = !state.isOpenUserinfo;
-      } else {
-        state.isOpenLogin = true;
-        // 此时加载一个key，用来生成二维码的key
-        getQrKey().then((res: string) => {
-          getQrcodeByKey(res);
-        });
-      }
-    };
-    // 关闭用户信息下拉框
-    const handleCloseDrective = () => {
-      state.isOpenUserinfo = false;
-      state.isOpenLogin = false;
-    };
-
     // 路由返回
     const routerBack = () => {
       router.back();
-    };
-
-    // 去用户信息设置界面
-    const gotoUserInfoEdit = () => {
-      router.push({
-        name: 'UsreInfoEdit',
-        params: {
-          uid: 1,
-        },
-      });
-      state.isOpenUserinfo = false;
     };
 
     // 得到热搜列表
@@ -266,127 +247,21 @@ export default defineComponent({
       state.hotdata = res.data.data;
     };
 
-    // 改变登陆方式
-    const changeLoginType = () => {
-      state.isQrCodeType = false;
-    };
-
-    // 切换到注册状态
-    const toggleRegister = () => {
-      state.isRegister = true;
-    };
-    // 切换到登陆状态
-    const toggleLogin = () => {
-      state.isRegister = false;
-    };
-    // 切换回二维码登录
-    const toggleQrLogin = () => {
-      state.isQrCodeType = true;
-    };
-
-    // 得到key
-    const getQrKey = async () => {
-      let res = await GET_QR_KEY();
-      if (res.data) {
-        state.key = res.data.data.unikey;
-        return new Promise(resolve => {
-          resolve(res.data.data.unikey);
-        });
-      }
-    };
-
-    // 根据key得到二维码
-    const getQrcodeByKey = async (key: string) => {
-      let res = await CREATE_QR_CODE_BY_KEY({
-        key,
-        qrimg: true,
-      });
-      if (res.data) {
-        state.qrcode = res.data.data.qrimg;
-      }
-    };
-
-    // 根据生成的key轮询校验二维码状态
-    const loopCheckKye = async (key: string) => {
-      let res = await LOOP_CHECK_QRCODE({
-        key,
-      });
-      // 检测状态
-      if (res.data.code === 800) {
-        // 过期了
-        state.isTimeout = true;
-      } else if (res.data.code === 803) {
-        // 授权成功了，成功登陆，清除定时器
-        clearInterval(state.timer);
-        state.timer = null;
-        // 关闭这个登陆框
-        state.isOpenLogin = false;
-        // 此时再发起一个检查登陆状态的请求，可以得到用户信息
-        checkLoginStatu();
-      }
-    };
-
-    // 检查登陆状态
-    const checkLoginStatu = async () => {
-      let res = await GET_LOGIN_STATUS();
-      // 要这个account有值说明携带了cookie
-      if (res.data.data.account) {
-        let profile = res.data.data.profile;
-        // 在这里提交vuex记录登陆状态，同事要把用户信息持久化到本地
-        let info = {
-          name: profile.nickname,
-          id: profile.userId,
-          avater: profile.avatarUrl,
-          signature: profile.signature,
-          gender: profile.gender,
-          city: profile.city,
-          province: profile.province,
-        };
-        store.commit('userModel/SET_USER_INFO', info);
-      }
-    };
-
-    // 登陆卡片关闭时重置一些状态
-    const loginBoxClose = () => {
-      clearInterval(state.timer);
-      state.timer = null;
-      state.isQrCodeType = true;
-      state.isRegister = false;
-      state.isTimeout = false;
-    };
-
-    const testCookie = async () => {
-      let res = await GET_USER_SONG_LIST({ uid: info.value.id });
-      console.log(res);
-    };
-
-    // 监听二维码，轮询一个校验二维码状态的接口
-    watch(
-      () => state.qrcode,
-      () => {
-        state.timer = setInterval(() => {
-          loopCheckKye(state.key);
-        }, 1000);
-      }
-    );
-
-    //  当页面加载完毕时，检测本地是否有用户信息，有的话加载回vuex
-    onMounted(() => {
-      getItem(USER_INFO_KEY).then(res => {
-        if (res) {
-          store.commit('userModel/SET_USER_INFO', res);
-        }
-      });
-    });
-
-    onUnmounted(() => {
-      clearInterval(state.timer);
-      state.timer = null;
-    });
+    const toUserInfoDetails = () => {};
 
     // 根据key得到
     getHotData();
     return {
+      isOpenUserinfo,
+      isOpenLogin,
+      qrcode,
+      key,
+      isQrCodeType,
+      isRegister,
+      isTimeout,
+      timer,
+      info,
+      rules,
       selectHistoryItem,
       toUserInfo,
       handleCloseDrective,
@@ -394,13 +269,15 @@ export default defineComponent({
       routerBack,
       KedownHandle,
       ...toRefs(state),
-      info,
       changeLoginType,
       toggleRegister,
       toggleLogin,
       toggleQrLogin,
       loginBoxClose,
-      testCookie,
+      toUserInfoDetails,
+      loginOrRegist,
+      formRef,
+      loginFrom,
     };
   },
 });

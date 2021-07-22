@@ -31,7 +31,7 @@
             <span>播放全部</span>
           </div>
           <div class="collect">
-            <i class="iconfont icon-shoucang"></i>
+            <i class="iconfont icon-quxiaoshoucang"></i>
             <span>收藏({{ judgePayCount(detailsInfo?.subscribedCount) }})</span>
           </div>
           <div class="share">
@@ -68,9 +68,9 @@
     </div>
 
     <div class="middle-list">
-      <div class="search-song">
+      <!-- <div class="search-song">
         <el-input placeholder="请输入内容" size="mini" suffix-icon="el-icon-search"></el-input>
-      </div>
+      </div> -->
       <el-tabs v-model="activePane" class="pane-customer-class">
         <el-tab-pane label="歌曲列表" name="songList">
           <el-table
@@ -79,13 +79,12 @@
             :data="songList"
             v-loading="loading"
             style="width: 100%"
-            max-height="610"
             empty-text="暂无数据"
           >
             <el-table-column type="index" width="80"></el-table-column>
             <el-table-column prop="pic" width="80">
               <div class="operate">
-                <i class="iconfont icon-heart"></i>
+                <i class="iconfont icon-heart" @click="showTotal"></i>
                 <i class="iconfont icon-xiazai1"></i>
               </div>
             </el-table-column>
@@ -107,8 +106,12 @@
             </el-table-column>
           </el-table>
         </el-tab-pane>
-        <el-tab-pane label="评论" name="comment">评论</el-tab-pane>
-        <el-tab-pane label="收藏者" name="subscriber">收藏者</el-tab-pane>
+        <el-tab-pane :label="`评论(${total})`" name="comment">
+          <comments-list @get-total="getTotal" />
+        </el-tab-pane>
+        <el-tab-pane label="收藏者" name="subscriber">
+          <subscriber-list />
+        </el-tab-pane>
       </el-tabs>
     </div>
   </div>
@@ -119,8 +122,14 @@ import { computed, defineComponent, reactive, toRefs, watchEffect } from 'vue';
 import { GET_SONG_LIST_DETAILS, GET_SONG_LIST_BY_ID_CHAIN } from '@/api/modules/music';
 import { useRoute } from 'vue-router';
 import GloabTools from '@/utils/tools';
+import SubscriberList from './components/subscriberList.vue';
+import CommentsList from './components/commentsList.vue';
 export default defineComponent({
   name: 'SongDetailsList',
+  components: {
+    SubscriberList,
+    CommentsList,
+  },
   setup() {
     const state = reactive({
       isMore: false,
@@ -130,11 +139,13 @@ export default defineComponent({
       des: [],
       activePane: 'songList',
       loading: false,
+      total: 0,
     });
 
     const route = useRoute();
     const { judgePayCount, formatDate, dtJudge } = GloabTools();
 
+    // 三角按钮样式
     const moreSty = computed(() => {
       if (state.isMore) {
         return {
@@ -182,6 +193,13 @@ export default defineComponent({
       }
     };
 
+    // 得到总页数
+    const getTotal = val => {
+      state.total = val;
+    };
+
+    const showTotal = () => {};
+
     watchEffect(() => {
       let id = route.query.id as string;
       if (id) {
@@ -196,6 +214,8 @@ export default defineComponent({
       judgePayCount,
       formatDate,
       dtJudge,
+      showTotal,
+      getTotal,
     };
   },
 });
@@ -204,7 +224,6 @@ export default defineComponent({
 .song-details-wrap {
   width: 100%;
   height: 100%;
-  box-sizing: border-box;
   overflow-y: auto;
   overflow-x: hidden;
   @include scroll-bar;

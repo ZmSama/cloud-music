@@ -6,6 +6,7 @@
 
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import Message from '@/components/message/src/message';
+import { ElMessage } from 'element-plus';
 
 // 定义一些状态
 const MsgStatus = (status: number) => {
@@ -33,7 +34,7 @@ const MsgStatus = (status: number) => {
       message = '服务未实现(501)';
       break;
     case 502:
-      message = '网络错误(502)';
+      message = '密码错误';
       break;
     case 503:
       message = '服务不可用(503)';
@@ -44,10 +45,12 @@ const MsgStatus = (status: number) => {
     case 505:
       message = 'HTTP版本不受支持(505)';
       break;
+    case 800:
+      message = '二维码过期';
+      break;
     default:
-      message = `连接出错(${status})!`;
+      message = null;
   }
-
   return message;
 };
 
@@ -63,7 +66,7 @@ const service = axios.create({
     },
   },
   withCredentials: true,
-  timeout: 3 * 1000,
+  timeout: 3 * 10000,
 });
 
 // 请求拦截
@@ -94,19 +97,17 @@ service.interceptors.request.use(
 // 响应拦截
 service.interceptors.response.use(
   (response: AxiosResponse) => {
-    const status = response.status;
-    let msg = MsgStatus(status);
-    if (status < 200 || status >= 300) {
-      if (typeof response.data === 'string') {
-        response.data = { msg };
-      } else {
-        response.data.msg = msg;
-        response.data.status = false;
-      }
+    const code = response.data.code;
+    let msg = MsgStatus(code);
+    if (msg) {
+      ElMessage({
+        type: 'error',
+        message: msg,
+      });
+      return Promise.reject(msg);
     } else {
-      response.data.status = true;
+      return response;
     }
-    return response;
   },
   error => {
     if (axios.isCancel(error)) {

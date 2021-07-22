@@ -49,7 +49,7 @@ export function useMusic() {
   const updateMusicStatus = () => {
     audioRef.value.addEventListener('timeupdate', e => {
       // 得到总时长
-      const duration = e.target.duration;
+      const duration = e.target['duration'];
       if (!state.duration) {
         // // 计算得到分钟
         let totalMin = Math.floor(duration / 60);
@@ -70,7 +70,7 @@ export function useMusic() {
         state.duration = `${totalMin}:${totalSec > 10 ? totalSec : '0' + totalSec}`;
       });
       // 得到当前播放的时间
-      const currentTime = e.target.currentTime;
+      const currentTime = e.target['currentTime'];
       store.commit('playModel/SET_CURRENT_TIME', currentTime);
       // 相除乘于100后就可以得到百分比数,这个就是进度条的长度
       let progresswidt = (currentTime / duration) * 100;
@@ -125,7 +125,7 @@ export function useMusic() {
    */
   const clickProgressArea = (e: MouseEvent) => {
     // 得到容器长度
-    let progressWidth = e.target.clientWidth;
+    let progressWidth = e.target['clientWidth'];
     // 得到点击的坐标
     let clickOffsetX = e.offsetX;
     //   得到播放总时长

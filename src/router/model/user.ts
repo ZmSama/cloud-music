@@ -8,7 +8,15 @@ const userRoterList: RouteRecordRaw[] = [
   {
     path: '/user-info-edit',
     name: 'UsreInfoEdit',
-    component: () => import('@/views/user/components/UserInfoEdit.vue'),
+    component: () => import('@/views/user/components/userInfoEdit.vue'),
+    meta: {
+      index: 4,
+    },
+  },
+  {
+    path: '/user-info-details',
+    name: 'UsreInfoDetails',
+    component: () => import('@/views/user/components/userInfoDetails.vue'),
     meta: {
       index: 4,
     },

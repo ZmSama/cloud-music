@@ -149,3 +149,27 @@ export function GET_SONG_LIST_BY_ID_CHAIN(params?) {
     params,
   });
 }
+/**
+ * @msg: 调用此接口 , 传入歌单id得到收藏者
+ * @param {*} data
+ * @return {*}
+ */
+export function GET_SONG_SUBSCRIBER_BY_ID(params?) {
+  return request({
+    method: 'GET',
+    url: '/playlist/subscribers',
+    params,
+  });
+}
+/**
+ * @msg: 调用此接口 , 传入歌单id获得歌单评论
+ * @param {*} data
+ * @return {*}
+ */
+export function GET_SONG_LIST_COMMENTS_BY_ID(params?) {
+  return request({
+    method: 'GET',
+    url: '/comment/playlist',
+    params,
+  });
+}
